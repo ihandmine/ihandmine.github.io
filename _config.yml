@@ -5,3 +5,11 @@ plugins:
 title: AIOSCPY
 description: 基于 asyncio + aiolibs 全家桶实现scrapy流程及标准的协程爬虫框架
 show_downloads: true
+
+github:
+  zip_url: https://github.com/ihandmine/aioscpy/archive/refs/tags/0.3.12.zip
+  tar_url: https://github.com/ihandmine/aioscpy/archive/refs/tags/0.3.12.tar.gz
+  repository_url: https://github.com/ihandmine/aioscpy
+  owner_url: https://github.com/ihandmine
+  owner_url: ihandmine
+  is_project_page: true
