@@ -1,8 +1,9 @@
-remote_theme: pages-themes/cayman@v0.2.0
+remote_theme: pages-themes/minimal@v0.2.0
 plugins:
 - jekyll-remote-theme # add this line to the plugins list if you already have one
 
 title: AIOSCPY
+logo: /doc/images/aioscpy.png
 description: 基于 asyncio + aiolibs 全家桶实现scrapy流程及标准的协程爬虫框架
 show_downloads: true
 
@@ -14,14 +15,3 @@ github:
   owner_url: ihandmine
   is_project_page: true
   
- navigation:
-- text: Download
-  url: download/
-- text: Documentation
-  url: doc/
-- text: Resources
-  url: resources/
-- text: Community
-  url: community/
-- text: Commercial Support
-  url: companies/
