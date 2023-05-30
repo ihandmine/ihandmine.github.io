@@ -13,3 +13,15 @@ github:
   owner_url: https://github.com/ihandmine
   owner_url: ihandmine
   is_project_page: true
+  
+ navigation:
+- text: Download
+  url: download/
+- text: Documentation
+  url: doc/
+- text: Resources
+  url: resources/
+- text: Community
+  url: community/
+- text: Commercial Support
+  url: companies/
