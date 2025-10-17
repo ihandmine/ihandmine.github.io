@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/OIP.jpg">
+  <link rel="mask-icon" href="/images/OIP.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ihandmine.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="简单正直">
+<meta property="og:type" content="website">
+<meta property="og:title" content="一枚酸心果子">
+<meta property="og:url" content="https://ihandmine.github.io/page/2/index.html">
+<meta property="og:site_name" content="一枚酸心果子">
+<meta property="og:description" content="简单正直">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="果子">
+<meta property="article:tag" content="爬虫，python，数据挖掘，技术分享，逆向工具，技术笔记">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://ihandmine.github.io/page/2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>一枚酸心果子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一枚酸心果子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">果子果子果子果子果子~~~</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">21</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/ihandmine" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/09/08/article8_ssl_pinning_bypass/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/08/article8_ssl_pinning_bypass/" class="post-title-link" itemprop="url">绕过SSL Pinning实战：从原理到工具链的完整指南</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-08 15:24:44" itemprop="dateCreated datePublished" datetime="2025-09-08T15:24:44+08:00">2025-09-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:40:23" itemprop="dateModified" datetime="2025-10-17T11:40:23+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>20k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>18 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="SSL-Pinning基础回顾"><a href="#SSL-Pinning基础回顾" class="headerlink" title="SSL Pinning基础回顾"></a>SSL Pinning基础回顾</h2><h3 id="什么是SSL-Pinning？"><a href="#什么是SSL-Pinning？" class="headerlink" title="什么是SSL Pinning？"></a>什么是SSL Pinning？</h3><p>SSL Pinning（证书固定）是一种安全机制，通过将服务器的证书或公钥”固定”在客户端应用中，确保只接受特定的证书，防止中间人攻击。</p>
+<p><strong>核心原理</strong>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">传统HTTPS验证：客户端 → 系统证书库 → 验证服务器证书</span><br><span class="line">SSL Pinning验证：客户端 → 预置固定证书 → 直接验证</span><br></pre></td></tr></table></figure>
+        <div class="home-post-tags">
+            <a href="/tags/SSL-TLS/" rel="tag">SSL/TLS</a>
+            <a href="/tags/%E7%BB%95%E8%BF%87/" rel="tag">绕过</a>
+            <a href="/tags/%E5%AE%9E%E6%88%98/" rel="tag">实战</a>
+            <a href="/tags/%E5%8E%9F%E7%90%86/" rel="tag">原理</a>
+            <a href="/tags/%E5%B7%A5%E5%85%B7%E9%93%BE/" rel="tag">工具链</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/09/08/article8_ssl_pinning_bypass/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/09/04/article7_ssl_tls_analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/04/article7_ssl_tls_analysis/" class="post-title-link" itemprop="url">SSL/TLS协议解析：从握手到证书固定</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-04 15:24:44" itemprop="dateCreated datePublished" datetime="2025-09-04T15:24:44+08:00">2025-09-04</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:40:15" itemprop="dateModified" datetime="2025-10-17T11:40:15+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>26k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>24 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="SSL-TLS协议基础"><a href="#SSL-TLS协议基础" class="headerlink" title="SSL&#x2F;TLS协议基础"></a>SSL&#x2F;TLS协议基础</h2><h3 id="协议发展历程"><a href="#协议发展历程" class="headerlink" title="协议发展历程"></a>协议发展历程</h3><p><strong>SSL&#x2F;TLS协议演进</strong>：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">1994</span>年：SSL <span class="number">1</span>.<span class="number">0</span> (未发布)</span><br><span class="line"><span class="attribute">1995</span>年：SSL <span class="number">2</span>.<span class="number">0</span> (已废弃)</span><br><span class="line"><span class="attribute">1996</span>年：SSL <span class="number">3</span>.<span class="number">0</span> (已废弃)</span><br><span class="line"><span class="attribute">1999</span>年：TLS <span class="number">1</span>.<span class="number">0</span></span><br><span class="line"><span class="attribute">2006</span>年：TLS <span class="number">1</span>.<span class="number">1</span></span><br><span class="line"><span class="attribute">2008</span>年：TLS <span class="number">1</span>.<span class="number">2</span></span><br><span class="line"><span class="attribute">2018</span>年：TLS <span class="number">1</span>.<span class="number">3</span></span><br></pre></td></tr></table></figure>
+        <div class="home-post-tags">
+            <a href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a>
+            <a href="/tags/SSL-TLS/" rel="tag">SSL/TLS</a>
+            <a href="/tags/%E5%88%86%E6%9E%90/" rel="tag">分析</a>
+            <a href="/tags/%E6%8F%A1%E6%89%8B/" rel="tag">握手</a>
+            <a href="/tags/%E8%AF%81%E4%B9%A6%E5%9B%BA%E5%AE%9A/" rel="tag">证书固定</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/09/04/article7_ssl_tls_analysis/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/09/03/article6_web_detection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/03/article6_web_detection/" class="post-title-link" itemprop="url">Web应用代理检测机制：前端与后端的攻防博弈</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-03 15:24:44" itemprop="dateCreated datePublished" datetime="2025-09-03T15:24:44+08:00">2025-09-03</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:40:09" itemprop="dateModified" datetime="2025-10-17T11:40:09+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>13 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Web代理检测的技术背景"><a href="#Web代理检测的技术背景" class="headerlink" title="Web代理检测的技术背景"></a>Web代理检测的技术背景</h2><h3 id="为什么Web应用需要检测代理？"><a href="#为什么Web应用需要检测代理？" class="headerlink" title="为什么Web应用需要检测代理？"></a>为什么Web应用需要检测代理？</h3><p>Web应用检测代理的主要原因：</p>
+<ul>
+<li><strong>反爬虫机制</strong>：防止自动化工具滥用API</li>
+<li><strong>地理限制</strong>：确保用户来自特定地区</li>
+<li><strong>安全防护</strong>：防止恶意流量和攻击</li>
+<li><strong>数据统计</strong>：准确统计用户来源和访问量</li>
+<li><strong>合规要求</strong>：满足某些法规对用户身份验证的要求</li>
+</ul>
+<p>接下来我将通过一些代码片段来简单剖析其中的一些原理和应对方法</p>
+        <div class="home-post-tags">
+            <a href="/tags/%E4%BB%A3%E7%90%86/" rel="tag">代理</a>
+            <a href="/tags/VPN/" rel="tag">VPN</a>
+            <a href="/tags/Web/" rel="tag">Web</a>
+            <a href="/tags/%E6%94%BB%E9%98%B2/" rel="tag">攻防</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/09/03/article6_web_detection/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/09/02/article5_ios_detection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/09/02/article5_ios_detection/" class="post-title-link" itemprop="url">iOS代理检测与绕过技术：与Android的对比</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-02 15:24:44" itemprop="dateCreated datePublished" datetime="2025-09-02T15:24:44+08:00">2025-09-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:39:57" itemprop="dateModified" datetime="2025-10-17T11:39:57+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="iOS-vs-Android：检测机制对比"><a href="#iOS-vs-Android：检测机制对比" class="headerlink" title="iOS vs Android：检测机制对比"></a>iOS vs Android：检测机制对比</h2><h3 id="系统架构差异"><a href="#系统架构差异" class="headerlink" title="系统架构差异"></a>系统架构差异</h3><p><strong>iOS系统特点</strong>：</p>
+<ul>
+<li><strong>沙盒机制</strong>：应用运行在严格的沙盒环境中</li>
+<li><strong>系统API限制</strong>：网络配置API相对封闭</li>
+<li><strong>证书管理</strong>：系统级证书固定和验证</li>
+<li><strong>越狱检测</strong>：多重越狱状态检测机制
+        <div class="home-post-tags">
+            <a href="/tags/iOS/" rel="tag">iOS</a>
+            <a href="/tags/%E5%AE%89%E5%85%A8/" rel="tag">安全</a>
+            <a href="/tags/%E4%BB%A3%E7%90%86/" rel="tag">代理</a>
+            <a href="/tags/VPN/" rel="tag">VPN</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/09/02/article5_ios_detection/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/08/30/article4_iptables_transparent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/30/article4_iptables_transparent/" class="post-title-link" itemprop="url">高级绕过技术：iptables与透明代理</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-30 15:24:44" itemprop="dateCreated datePublished" datetime="2025-08-30T15:24:44+08:00">2025-08-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:39:14" itemprop="dateModified" datetime="2025-10-17T11:39:14+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="iptables基础原理"><a href="#iptables基础原理" class="headerlink" title="iptables基础原理"></a>iptables基础原理</h2><h3 id="什么是iptables？"><a href="#什么是iptables？" class="headerlink" title="什么是iptables？"></a>什么是iptables？</h3><p><strong>iptables</strong>简单来说就是Linux内核中Netfilter框架的一个”控制面板”。它就像网络世界的”交通警察”，可以控制哪些数据包能通过，哪些不能通过，以及数据包应该往哪里走。</p>
+<p>在Android系统中，由于基于Linux内核，同样可以使用iptables进行网络控制。</p>
+<h3 id="Netfilter架构"><a href="#Netfilter架构" class="headerlink" title="Netfilter架构"></a>Netfilter架构</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">用户空间：iptables命令</span><br><span class="line">    ↓</span><br><span class="line">内核空间：Netfilter框架</span><br><span class="line">    ↓</span><br><span class="line">网络数据包处理</span><br></pre></td></tr></table></figure>
+        <div class="home-post-tags">
+            <a href="/tags/Android/" rel="tag">Android</a>
+            <a href="/tags/iptables/" rel="tag">iptables</a>
+            <a href="/tags/%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86/" rel="tag">透明代理</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/08/30/article4_iptables_transparent/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/08/29/article3_android_detection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/29/article3_android_detection/" class="post-title-link" itemprop="url">Android代理检测与绕过技术：攻防对抗的艺术</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-29 15:24:44" itemprop="dateCreated datePublished" datetime="2025-08-29T15:24:44+08:00">2025-08-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:38:55" itemprop="dateModified" datetime="2025-10-17T11:38:55+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Android代理检测原理"><a href="#Android代理检测原理" class="headerlink" title="Android代理检测原理"></a>Android代理检测原理</h2><h3 id="检测机制概述"><a href="#检测机制概述" class="headerlink" title="检测机制概述"></a>检测机制概述</h3><p>Android系统提供了多种API来检测网络配置状态，开发者可以利用这些API来识别用户是否使用了代理或VPN：</p>
+<ul>
+<li><strong>ConnectivityManager</strong>：检测网络连接状态和代理设置</li>
+<li><strong>NetworkInterface</strong>：检测网络接口信息</li>
+<li><strong>系统属性</strong>：检测DNS服务器等系统配置</li>
+<li><strong>网络能力</strong>：检测网络传输类型</li>
+</ul>
+        <div class="home-post-tags">
+            <a href="/tags/Android/" rel="tag">Android</a>
+            <a href="/tags/%E5%AE%89%E5%85%A8/" rel="tag">安全</a>
+            <a href="/tags/%E4%BB%A3%E7%90%86/" rel="tag">代理</a>
+            <a href="/tags/VPN/" rel="tag">VPN</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/08/29/article3_android_detection/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/08/28/article2_proxy_vpn/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/28/article2_proxy_vpn/" class="post-title-link" itemprop="url">代理与VPN技术解析：网络安全中的双刃剑</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-28 15:24:44" itemprop="dateCreated datePublished" datetime="2025-08-28T15:24:44+08:00">2025-08-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:38:34" itemprop="dateModified" datetime="2025-10-17T11:38:34+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="什么是代理（Proxy）？"><a href="#什么是代理（Proxy）？" class="headerlink" title="什么是代理（Proxy）？"></a>什么是代理（Proxy）？</h2><h3 id="代理的定义"><a href="#代理的定义" class="headerlink" title="代理的定义"></a>代理的定义</h3><p><strong>代理（Proxy）</strong>简单来说就是一种”中间人”服务。当你想要访问某个网站时，不是直接连接，而是先连接到代理服务器，然后由代理服务器帮你访问目标网站。</p>
+<h3 id="代理的工作原理"><a href="#代理的工作原理" class="headerlink" title="代理的工作原理"></a>代理的工作原理</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">你的电脑 → 代理服务器 → 目标网站</span><br></pre></td></tr></table></figure>
+        <div class="home-post-tags">
+            <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a>
+            <a href="/tags/%E5%AE%89%E5%85%A8/" rel="tag">安全</a>
+            <a href="/tags/%E4%BB%A3%E7%90%86/" rel="tag">代理</a>
+            <a href="/tags/VPN/" rel="tag">VPN</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/08/28/article2_proxy_vpn/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/08/27/art001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/27/art001/" class="post-title-link" itemprop="url">OSI七层模型详解</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-27 15:24:44" itemprop="dateCreated datePublished" datetime="2025-08-27T15:24:44+08:00">2025-08-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:38:20" itemprop="dateModified" datetime="2025-10-17T11:38:20+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/" itemprop="url" rel="index"><span itemprop="name">网络协议</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="什么是OSI七层模型？"><a href="#什么是OSI七层模型？" class="headerlink" title="什么是OSI七层模型？"></a>什么是OSI七层模型？</h2><p>简单来说，<strong>OSI七层模型</strong>就是国际标准化组织（ISO）制定的一个网络通信标准。它把网络通信过程分成了七个层次，每一层都有自己特定的”工作职责”。</p>
+<p>想象一下，网络通信就像快递送包裹一样，需要经过多个环节：打包、贴标签、装车、运输、卸货、分拣、最后送到收件人手里。每一层就相当于一个环节，各司其职。</p>
+        <div class="home-post-tags">
+            <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag">网络</a>
+            <a href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag">协议</a>
+            <a href="/tags/%E6%A8%A1%E5%9E%8B/" rel="tag">模型</a>
+            <a href="/tags/%E8%AF%A6%E8%A7%A3/" rel="tag">详解</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/08/27/art001/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/08/15/article9_android_root_tools/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/15/article9_android_root_tools/" class="post-title-link" itemprop="url">Android Root工具原理深度解析：从Magisk到KernelSU的技术演进</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-15 15:24:44" itemprop="dateCreated datePublished" datetime="2025-08-15T15:24:44+08:00">2025-08-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:41:21" itemprop="dateModified" datetime="2025-10-17T11:41:21+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>20k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>18 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="Root工具发展历程"><a href="#Root工具发展历程" class="headerlink" title="Root工具发展历程"></a>Root工具发展历程</h2><h3 id="历史演进时间线"><a href="#历史演进时间线" class="headerlink" title="历史演进时间线"></a>历史演进时间线</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2008</span><span class="string">年：Android</span> <span class="number">1.0</span><span class="string">发布，Root概念出现</span></span><br><span class="line"><span class="number">2009</span><span class="string">年：Superuser.apk诞生，最早的Root管理工具</span></span><br><span class="line"><span class="number">2010</span><span class="string">年：SuperSU发布，成为主流Root方案</span></span><br><span class="line"><span class="number">2012</span><span class="string">年：Chainfire开发CF-Auto-Root</span></span><br><span class="line"><span class="number">2014</span><span class="string">年：KingRoot发布，基于漏洞利用的Root方案</span></span><br><span class="line"><span class="number">2016</span><span class="string">年：Magisk发布，引入模块化Root概念</span></span><br><span class="line"><span class="number">2017</span><span class="string">年：LineageOS</span> <span class="string">Superuser，开源Root管理</span></span><br><span class="line"><span class="number">2018</span><span class="string">年：MagiskHide发布，绕过SafetyNet检测</span></span><br><span class="line"><span class="number">2021</span><span class="string">年：KernelSU发布，基于内核的Root方案</span></span><br><span class="line"><span class="number">2022</span><span class="string">年：APatch发布，Magisk的现代化替代品</span></span><br><span class="line"><span class="number">2023</span><span class="string">年：KernelSU分支发展，支持更多设备</span></span><br></pre></td></tr></table></figure>
+        <div class="home-post-tags">
+            <a href="/tags/Android/" rel="tag">Android</a>
+            <a href="/tags/Root/" rel="tag">Root</a>
+            <a href="/tags/%E5%B7%A5%E5%85%B7%E5%8E%9F%E7%90%86/" rel="tag">工具原理</a>
+            <a href="/tags/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" rel="tag">深度解析</a>
+            <a href="/tags/%E4%BC%A0%E7%BB%9F/" rel="tag">传统</a>
+            <a href="/tags/%E7%8E%B0%E4%BB%A3/" rel="tag">现代</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/08/15/article9_android_root_tools/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/08/15/network_basics_article/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2025/08/15/network_basics_article/" class="post-title-link" itemprop="url">网络协议深度解析：从HTTP到QUIC的演进之路</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-15 15:24:44" itemprop="dateCreated datePublished" datetime="2025-08-15T15:24:44+08:00">2025-08-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:51:05" itemprop="dateModified" datetime="2025-10-17T11:51:05+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="网络协议的发展脉络"><a href="#网络协议的发展脉络" class="headerlink" title="网络协议的发展脉络"></a>网络协议的发展脉络</h2><p>网络协议就像人类语言的进化史，从简单的交流到复杂的表达，不断适应着时代的需求。</p>
+<p><strong>协议演进时间线</strong>：</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">1991</span>年：HTTP/<span class="number">1</span>.<span class="number">0</span> 诞生</span><br><span class="line"><span class="attribute">1997</span>年：HTTP/<span class="number">1</span>.<span class="number">1</span> 标准化</span><br><span class="line"><span class="attribute">2009</span>年：SPDY 协议提出</span><br><span class="line"><span class="attribute">2015</span>年：HTTP/<span class="number">2</span> 正式发布</span><br><span class="line"><span class="attribute">2022</span>年：HTTP/<span class="number">3</span> 成为标准</span><br></pre></td></tr></table></figure>
+        <div class="home-post-tags">
+            <a href="/tags/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" rel="tag">深度解析</a>
+            <a href="/tags/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/" rel="tag">网络协议</a>
+            <a href="/tags/HTTP/" rel="tag">HTTP</a>
+            <a href="/tags/QUIC/" rel="tag">QUIC</a>
+            <a href="/tags/%E6%BC%94%E8%BF%9B%E4%B9%8B%E8%B7%AF/" rel="tag">演进之路</a>
+            <script type="text/javascript">
+            var tagsall=document.getElementsByClassName("home-post-tags")
+            for (var i = tagsall.length - 1; i >= 0; i--){
+                var tags=tagsall[i].getElementsByTagName("a");
+                for (var j = tags.length - 1; j >= 0; j--) {
+                    var r=Math.floor(Math.random()*255);
+                    var g=Math.floor(Math.random()*255);
+                    var b=Math.floor(Math.random()*255);
+                    tags[j].style.background = "rgb("+r+","+g+","+b+")";
+                }
+            }
+            </script>
+        </div>
+
+
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2025/08/15/network_basics_article/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="果子"
+      src="/images/gzhavatar.jpg">
+  <p class="site-author-name" itemprop="name">果子</p>
+  <div class="site-description" itemprop="description">简单正直</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ihandmine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ihandmine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/handmine@outlook.com" title="E-Mail → handmine@outlook.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果子</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">221k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:21</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/tororo.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

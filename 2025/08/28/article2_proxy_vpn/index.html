@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/OIP.jpg">
+  <link rel="mask-icon" href="/images/OIP.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ihandmine.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="什么是代理（Proxy）？代理的定义代理（Proxy）简单来说就是一种”中间人”服务。当你想要访问某个网站时，不是直接连接，而是先连接到代理服务器，然后由代理服务器帮你访问目标网站。 代理的工作原理1你的电脑 → 代理服务器 → 目标网站">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代理与VPN技术解析：网络安全中的双刃剑">
+<meta property="og:url" content="https://ihandmine.github.io/2025/08/28/article2_proxy_vpn/index.html">
+<meta property="og:site_name" content="一枚酸心果子">
+<meta property="og:description" content="什么是代理（Proxy）？代理的定义代理（Proxy）简单来说就是一种”中间人”服务。当你想要访问某个网站时，不是直接连接，而是先连接到代理服务器，然后由代理服务器帮你访问目标网站。 代理的工作原理1你的电脑 → 代理服务器 → 目标网站">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-28T07:24:44.000Z">
+<meta property="article:modified_time" content="2025-10-17T03:38:34.965Z">
+<meta property="article:author" content="果子">
+<meta property="article:tag" content="网络">
+<meta property="article:tag" content="安全">
+<meta property="article:tag" content="代理">
+<meta property="article:tag" content="VPN">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://ihandmine.github.io/2025/08/28/article2_proxy_vpn/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>代理与VPN技术解析：网络安全中的双刃剑 | 一枚酸心果子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一枚酸心果子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">果子果子果子果子果子~~~</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">21</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/ihandmine" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/08/28/article2_proxy_vpn/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          代理与VPN技术解析：网络安全中的双刃剑
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-28 15:24:44" itemprop="dateCreated datePublished" datetime="2025-08-28T15:24:44+08:00">2025-08-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:38:34" itemprop="dateModified" datetime="2025-10-17T11:38:34+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="什么是代理（Proxy）？"><a href="#什么是代理（Proxy）？" class="headerlink" title="什么是代理（Proxy）？"></a>什么是代理（Proxy）？</h2><h3 id="代理的定义"><a href="#代理的定义" class="headerlink" title="代理的定义"></a>代理的定义</h3><p><strong>代理（Proxy）</strong>简单来说就是一种”中间人”服务。当你想要访问某个网站时，不是直接连接，而是先连接到代理服务器，然后由代理服务器帮你访问目标网站。</p>
+<h3 id="代理的工作原理"><a href="#代理的工作原理" class="headerlink" title="代理的工作原理"></a>代理的工作原理</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">你的电脑 → 代理服务器 → 目标网站</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<p>就像你让朋友帮你买东西一样：</p>
+<ol>
+<li>你告诉朋友（代理服务器）要买什么</li>
+<li>朋友去商店（目标网站）帮你买</li>
+<li>朋友把东西（数据）带回来给你</li>
+</ol>
+<h3 id="代理的类型和介绍"><a href="#代理的类型和介绍" class="headerlink" title="代理的类型和介绍"></a>代理的类型和介绍</h3><h4 id="HTTP代理"><a href="#HTTP代理" class="headerlink" title="HTTP代理"></a>HTTP代理</h4><ul>
+<li><strong>适用场景</strong>：Web浏览、简单网页访问</li>
+<li><strong>常用工具</strong>：<ul>
+<li><strong>Burp Suite</strong>：专业的安全测试工具，内置HTTP代理功能</li>
+<li><strong>Fiddler</strong>：免费的HTTP调试代理工具</li>
+<li><strong>Charles</strong>：跨平台的HTTP代理工具，界面友好</li>
+</ul>
+</li>
+</ul>
+<h4 id="HTTPS代理-（HTTP-SSL-TLS）"><a href="#HTTPS代理-（HTTP-SSL-TLS）" class="headerlink" title="HTTPS代理 （HTTP + SSL&#x2F;TLS）"></a>HTTPS代理 （HTTP + SSL&#x2F;TLS）</h4><ul>
+<li><strong>适用场景</strong>：加密网站访问、安全传输</li>
+<li><strong>常用工具</strong>：<ul>
+<li><strong>Burp Suite Pro</strong>：支持HTTPS拦截和修改</li>
+<li><strong>mitmproxy</strong>：开源的交互式HTTPS代理工具</li>
+<li><strong>OWASP ZAP</strong>：免费的Web应用安全测试工具</li>
+</ul>
+</li>
+</ul>
+<h4 id="SOCKS代理"><a href="#SOCKS代理" class="headerlink" title="SOCKS代理"></a>SOCKS代理</h4><ul>
+<li><strong>适用场景</strong>：支持多种协议，功能全面</li>
+<li><strong>常用工具</strong>：<ul>
+<li><strong>Proxifier</strong>：Windows平台的专业代理工具</li>
+<li><strong>VProxid</strong>：Android平台的Proxifier替代工具</li>
+<li><strong>Shadowsocks</strong>：轻量级的SOCKS5代理工具</li>
+</ul>
+</li>
+</ul>
+<h4 id="透明代理"><a href="#透明代理" class="headerlink" title="透明代理"></a>透明代理</h4><ul>
+<li><strong>适用场景</strong>：企业网络、客户端无感知</li>
+<li><strong>常用工具</strong>：<ul>
+<li><strong>Squid</strong>：开源的Web代理缓存服务器</li>
+<li><strong>Nginx</strong>：高性能的HTTP服务器，可配置为反向代理</li>
+<li><strong>HAProxy</strong>：高可用性负载均衡器和代理服务器</li>
+</ul>
+</li>
+</ul>
+<h3 id="代理协议深度解析"><a href="#代理协议深度解析" class="headerlink" title="代理协议深度解析"></a>代理协议深度解析</h3><h4 id="HTTP代理的CONNECT方法"><a href="#HTTP代理的CONNECT方法" class="headerlink" title="HTTP代理的CONNECT方法"></a>HTTP代理的CONNECT方法</h4><p>HTTP代理使用CONNECT方法建立隧道连接，特别适用于HTTPS：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CONNECT</span> <span class="string">example.com:443</span> <span class="meta">HTTP/1.1</span></span><br><span class="line"><span class="attribute">Host</span><span class="punctuation">: </span>example.com:443</span><br><span class="line"><span class="attribute">Proxy-Authorization</span><span class="punctuation">: </span>Basic dXNlcjpwYXNz</span><br></pre></td></tr></table></figure>
+
+<h4 id="SOCKS4-vs-SOCKS5"><a href="#SOCKS4-vs-SOCKS5" class="headerlink" title="SOCKS4 vs SOCKS5"></a>SOCKS4 vs SOCKS5</h4><ul>
+<li><strong>SOCKS4</strong>：仅支持TCP，无认证</li>
+<li><strong>SOCKS5</strong>：支持TCP&#x2F;UDP，支持多种认证方式，支持IPv6</li>
+</ul>
+<h4 id="代理认证机制"><a href="#代理认证机制" class="headerlink" title="代理认证机制"></a>代理认证机制</h4><ul>
+<li><strong>Basic认证</strong>：用户名密码Base64编码（不安全）</li>
+<li><strong>Digest认证</strong>：使用MD5哈希（相对安全）</li>
+<li><strong>NTLM认证</strong>：Windows域认证</li>
+</ul>
+<h2 id="什么是VPN（Virtual-Private-Network）？"><a href="#什么是VPN（Virtual-Private-Network）？" class="headerlink" title="什么是VPN（Virtual Private Network）？"></a>什么是VPN（Virtual Private Network）？</h2><h3 id="VPN的定义"><a href="#VPN的定义" class="headerlink" title="VPN的定义"></a>VPN的定义</h3><p><strong>VPN（虚拟专用网络）</strong>就像在公共网络上建立了一条私密的”隧道”。所有通过这条隧道传输的数据都会被加密，外人无法看到你在做什么。</p>
+<h3 id="VPN的工作原理"><a href="#VPN的工作原理" class="headerlink" title="VPN的工作原理"></a>VPN的工作原理</h3><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">你的电脑 → VPN客户端 → VPN服务器 → 目标网站</span><br></pre></td></tr></table></figure>
+
+<p>就像你通过一条秘密通道去银行一样：</p>
+<ul>
+<li><strong>隧道技术</strong>：在公共网络上创建专用通道</li>
+<li><strong>加密传输</strong>：所有数据都经过加密处理</li>
+<li><strong>身份认证</strong>：确保只有授权用户才能访问</li>
+</ul>
+<h3 id="VPN的类型和介绍"><a href="#VPN的类型和介绍" class="headerlink" title="VPN的类型和介绍"></a>VPN的类型和介绍</h3><h4 id="远程访问VPN"><a href="#远程访问VPN" class="headerlink" title="远程访问VPN"></a>远程访问VPN</h4><ul>
+<li><strong>适用场景</strong>：远程办公、个人隐私保护</li>
+<li><strong>常用工具</strong>：<ul>
+<li><strong>OpenVPN</strong>：开源、安全、跨平台</li>
+<li><strong>WireGuard</strong>：新一代高性能VPN协议</li>
+<li><strong>NordVPN</strong>：商业VPN服务，用户友好</li>
+</ul>
+</li>
+</ul>
+<h4 id="站点到站点VPN"><a href="#站点到站点VPN" class="headerlink" title="站点到站点VPN"></a>站点到站点VPN</h4><ul>
+<li><strong>适用场景</strong>：企业分支机构互联</li>
+<li><strong>常用工具</strong>：<ul>
+<li><strong>IPsec</strong>：企业级标准，安全性高</li>
+<li><strong>Cisco AnyConnect</strong>：思科企业级VPN解决方案</li>
+<li><strong>Fortinet FortiGate</strong>：企业级防火墙和VPN设备</li>
+</ul>
+</li>
+</ul>
+<h4 id="移动VPN"><a href="#移动VPN" class="headerlink" title="移动VPN"></a>移动VPN</h4><ul>
+<li><strong>适用场景</strong>：移动设备安全连接</li>
+<li><strong>常用工具</strong>：<ul>
+<li><strong>IKEv2</strong>：移动设备友好，支持快速重连</li>
+<li><strong>L2TP&#x2F;IPsec</strong>：结合了PPTP和IPsec的优点</li>
+<li><strong>Android内置VPN</strong>：系统自带的VPN功能</li>
+</ul>
+</li>
+</ul>
+<h3 id="VPN协议深度解析"><a href="#VPN协议深度解析" class="headerlink" title="VPN协议深度解析"></a>VPN协议深度解析</h3><h4 id="OpenVPN的TLS握手"><a href="#OpenVPN的TLS握手" class="headerlink" title="OpenVPN的TLS握手"></a>OpenVPN的TLS握手</h4><ol>
+<li><strong>客户端Hello</strong>：支持的加密套件、随机数</li>
+<li><strong>服务器Hello</strong>：选择的加密套件、随机数</li>
+<li><strong>证书交换</strong>：服务器证书、客户端证书（可选）</li>
+<li><strong>密钥交换</strong>：生成会话密钥</li>
+<li><strong>完成握手</strong>：验证握手完整性</li>
+</ol>
+<h4 id="WireGuard的现代加密"><a href="#WireGuard的现代加密" class="headerlink" title="WireGuard的现代加密"></a>WireGuard的现代加密</h4><ul>
+<li><strong>Curve25519</strong>：椭圆曲线密钥交换</li>
+<li><strong>ChaCha20</strong>：流密码加密</li>
+<li><strong>Poly1305</strong>：消息认证码</li>
+<li><strong>BLAKE2s</strong>：哈希函数</li>
+</ul>
+<h4 id="IPsec的IKE协议"><a href="#IPsec的IKE协议" class="headerlink" title="IPsec的IKE协议"></a>IPsec的IKE协议</h4><ul>
+<li><strong>IKEv1</strong>：两阶段协商（主模式+快速模式）</li>
+<li><strong>IKEv2</strong>：单阶段协商，支持MOBIKE（移动性）</li>
+</ul>
+<h2 id="代理与VPN的区别对比"><a href="#代理与VPN的区别对比" class="headerlink" title="代理与VPN的区别对比"></a>代理与VPN的区别对比</h2><h3 id="协议层面差异（之前的文章有提前讲ISO七层模型，有点懵的往前翻翻）"><a href="#协议层面差异（之前的文章有提前讲ISO七层模型，有点懵的往前翻翻）" class="headerlink" title="协议层面差异（之前的文章有提前讲ISO七层模型，有点懵的往前翻翻）"></a>协议层面差异（之前的文章有提前讲ISO七层模型，有点懵的往前翻翻）</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>VPN</th>
+<th>代理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>工作层次</strong></td>
+<td>第2-3层（数据链路层和网络层）</td>
+<td>第7层（应用层）</td>
+</tr>
+<tr>
+<td><strong>协议支持</strong></td>
+<td>支持所有协议和端口</td>
+<td>仅支持特定协议</td>
+</tr>
+<tr>
+<td><strong>流量范围</strong></td>
+<td>转发所有网络流量</td>
+<td>仅转发应用层流量</td>
+</tr>
+</tbody></table>
+<p><strong>通俗理解</strong>：VPN就像给你的整个网络连接都套上了一层保护罩，而代理只是给特定的应用（比如浏览器）加了个”中转站”。</p>
+<h3 id="功能特性对比"><a href="#功能特性对比" class="headerlink" title="功能特性对比"></a>功能特性对比</h3><table>
+<thead>
+<tr>
+<th>功能</th>
+<th>VPN</th>
+<th>代理</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>加密级别</strong></td>
+<td>端到端加密</td>
+<td>通常不加密</td>
+</tr>
+<tr>
+<td><strong>匿名性</strong></td>
+<td>完全隐藏真实IP</td>
+<td>部分隐藏真实IP</td>
+</tr>
+<tr>
+<td><strong>速度影响</strong></td>
+<td>可能影响所有网络活动</td>
+<td>仅影响代理流量</td>
+</tr>
+<tr>
+<td><strong>配置复杂度</strong></td>
+<td>相对复杂</td>
+<td>相对简单</td>
+</tr>
+<tr>
+<td><strong>成本</strong></td>
+<td>通常较高</td>
+<td>通常较低</td>
+</tr>
+</tbody></table>
+<h2 id="实际应用场景"><a href="#实际应用场景" class="headerlink" title="实际应用场景"></a>实际应用场景</h2><h3 id="代理的应用场景"><a href="#代理的应用场景" class="headerlink" title="代理的应用场景"></a>代理的应用场景</h3><h4 id="Web爬虫"><a href="#Web爬虫" class="headerlink" title="Web爬虫"></a>Web爬虫</h4><ul>
+<li><strong>用途</strong>：绕过IP限制和反爬虫机制（这个大家都知道，就是为了防止被网站封禁）</li>
+<li><strong>技术要点</strong>：代理池轮换、User-Agent伪装、请求频率控制</li>
+</ul>
+<h4 id="内容访问"><a href="#内容访问" class="headerlink" title="内容访问"></a>内容访问</h4><ul>
+<li><strong>用途</strong>：访问地理限制的内容（如墙内网站）</li>
+<li><strong>技术要点</strong>：地理位置伪装、CDN节点选择</li>
+</ul>
+<h4 id="安全审计"><a href="#安全审计" class="headerlink" title="安全审计"></a>安全审计</h4><ul>
+<li><strong>用途</strong>：监控和过滤网络流量（企业里，监控员工的网络行为，防止泄露公司的敏感数据）</li>
+<li><strong>技术要点</strong>：流量分析、内容过滤、行为监控</li>
+</ul>
+<h4 id="游戏加速器"><a href="#游戏加速器" class="headerlink" title="游戏加速器"></a>游戏加速器</h4><ul>
+<li><strong>用途</strong>：降低游戏延迟，提升游戏体验</li>
+<li><strong>技术要点</strong>：节点优化、协议优化、智能路由</li>
+</ul>
+<h3 id="VPN的应用场景"><a href="#VPN的应用场景" class="headerlink" title="VPN的应用场景"></a>VPN的应用场景</h3><h4 id="远程办公"><a href="#远程办公" class="headerlink" title="远程办公"></a>远程办公</h4><ul>
+<li><strong>用途</strong>：安全访问企业内网（同样企业内的安全软件，如某深和某T等）</li>
+<li><strong>技术要点</strong>：双因素认证、访问控制、审计日志</li>
+</ul>
+<h4 id="数据保护"><a href="#数据保护" class="headerlink" title="数据保护"></a>数据保护</h4><ul>
+<li><strong>用途</strong>：保护敏感数据传输</li>
+<li><strong>技术要点</strong>：端到端加密、密钥管理、证书验证</li>
+</ul>
+<h4 id="企业级解决方案"><a href="#企业级解决方案" class="headerlink" title="企业级解决方案"></a>企业级解决方案</h4><ul>
+<li><strong>用途</strong>：分支机构互联、云服务访问</li>
+<li><strong>技术要点</strong>：负载均衡、故障转移、监控告警</li>
+</ul>
+<h2 id="Burp-Suite-Proxifier-工具简单介绍一下"><a href="#Burp-Suite-Proxifier-工具简单介绍一下" class="headerlink" title="Burp Suite + Proxifier 工具简单介绍一下"></a>Burp Suite + Proxifier 工具简单介绍一下</h2><h3 id="Burp-Suite使用入门"><a href="#Burp-Suite使用入门" class="headerlink" title="Burp Suite使用入门"></a>Burp Suite使用入门</h3><p>Burp Suite是Web安全测试的”瑞士军刀”：</p>
+<p><strong>主要功能模块</strong>：</p>
+<ul>
+<li><strong>Proxy</strong>：拦截和修改HTTP&#x2F;HTTPS请求</li>
+<li><strong>Spider</strong>：自动爬取网站内容</li>
+<li><strong>Scanner</strong>：自动安全漏洞扫描</li>
+<li><strong>Repeater</strong>：重复发送和修改请求</li>
+<li><strong>Intruder</strong>：自动化攻击测试</li>
+</ul>
+<h4 id="基本配置"><a href="#基本配置" class="headerlink" title="基本配置"></a>基本配置</h4><ol>
+<li><strong>启动Burp Suite</strong>：下载并安装后启动</li>
+<li><strong>配置代理</strong>：默认监听127.0.0.1:8080</li>
+<li><strong>浏览器设置</strong>：将浏览器代理设置为127.0.0.1:8080</li>
+<li><strong>安装证书</strong>：访问<a target="_blank" rel="noopener" href="http://burp/cert%E4%B8%8B%E8%BD%BD%E5%B9%B6%E5%AE%89%E8%A3%85%E8%AF%81%E4%B9%A6">http://burp/cert下载并安装证书</a></li>
+</ol>
+<h3 id="Proxifier使用入门"><a href="#Proxifier使用入门" class="headerlink" title="Proxifier使用入门"></a>Proxifier使用入门</h3><p>Proxifier是Windows平台的专业代理工具：</p>
+<h4 id="基本配置-1"><a href="#基本配置-1" class="headerlink" title="基本配置"></a>基本配置</h4><ol>
+<li><strong>添加代理服务器</strong>：填写代理服务器地址和端口</li>
+<li><strong>配置代理规则</strong>：选择哪些应用使用代理</li>
+<li><strong>测试连接</strong>：验证代理是否工作正常</li>
+</ol>
+<h4 id="高级功能"><a href="#高级功能" class="headerlink" title="高级功能"></a>高级功能</h4><ul>
+<li><strong>应用级代理</strong>：为不同应用设置不同代理</li>
+<li><strong>规则配置</strong>：基于域名、IP等条件选择代理</li>
+<li><strong>连接监控</strong>：实时查看代理连接状态</li>
+</ul>
+<h2 id="性能优化技巧"><a href="#性能优化技巧" class="headerlink" title="性能优化技巧"></a>性能优化技巧</h2><h3 id="代理连接池管理"><a href="#代理连接池管理" class="headerlink" title="代理连接池管理"></a>代理连接池管理</h3><ul>
+<li><strong>连接复用</strong>：减少TCP连接建立开销</li>
+<li><strong>连接池大小</strong>：根据并发需求调整</li>
+<li><strong>超时设置</strong>：避免连接长时间占用</li>
+</ul>
+<h3 id="VPN隧道优化"><a href="#VPN隧道优化" class="headerlink" title="VPN隧道优化"></a>VPN隧道优化</h3><ul>
+<li><strong>MTU调整</strong>：避免分片，提升传输效率</li>
+<li><strong>压缩算法</strong>：减少数据传输量</li>
+<li><strong>协议选择</strong>：根据网络环境选择最优协议</li>
+</ul>
+<h3 id="负载均衡策略"><a href="#负载均衡策略" class="headerlink" title="负载均衡策略"></a>负载均衡策略</h3><ul>
+<li><strong>轮询</strong>：简单均衡，适合服务器性能相近</li>
+<li><strong>权重</strong>：根据服务器性能分配流量</li>
+<li><strong>最少连接</strong>：优先选择连接数少的服务器</li>
+</ul>
+<h2 id="检测与反检测"><a href="#检测与反检测" class="headerlink" title="检测与反检测"></a>检测与反检测</h2><h3 id="代理检测方法"><a href="#代理检测方法" class="headerlink" title="代理检测方法"></a>代理检测方法</h3><ul>
+<li><strong>HTTP头检测</strong>：检查Via、X-Forwarded-For等头</li>
+<li><strong>IP地址检测</strong>：检查是否来自代理服务器</li>
+<li><strong>行为分析</strong>：分析访问模式是否异常</li>
+</ul>
+<h3 id="VPN流量特征"><a href="#VPN流量特征" class="headerlink" title="VPN流量特征"></a>VPN流量特征</h3><ul>
+<li><strong>协议特征</strong>：OpenVPN、IPsec等协议特征</li>
+<li><strong>端口特征</strong>：常见VPN端口（1194、500、4500等）</li>
+<li><strong>加密特征</strong>：加密流量的随机性特征</li>
+</ul>
+<h3 id="绕过技术"><a href="#绕过技术" class="headerlink" title="绕过技术"></a>绕过技术</h3><ul>
+<li><strong>协议混淆</strong>：伪装成正常流量</li>
+<li><strong>端口伪装</strong>：使用常见端口（80、443等）</li>
+<li><strong>流量分散</strong>：将流量分散到多个连接</li>
+</ul>
+<h2 id="安全风险与防护"><a href="#安全风险与防护" class="headerlink" title="安全风险与防护"></a>安全风险与防护</h2><h3 id="代理的安全风险"><a href="#代理的安全风险" class="headerlink" title="代理的安全风险"></a>代理的安全风险</h3><ul>
+<li><strong>数据泄露</strong>：代理服务器可能记录用户数据</li>
+<li><strong>中间人攻击</strong>：恶意代理可能截获通信</li>
+<li><strong>身份暴露</strong>：某些代理可能泄露真实IP</li>
+</ul>
+<h3 id="VPN的安全风险"><a href="#VPN的安全风险" class="headerlink" title="VPN的安全风险"></a>VPN的安全风险</h3><ul>
+<li><strong>日志记录</strong>：VPN提供商可能记录用户活动</li>
+<li><strong>DNS泄露</strong>：可能暴露真实DNS查询</li>
+<li><strong>恶意软件</strong>：某些免费VPN可能包含恶意代码</li>
+</ul>
+<h3 id="安全防护建议"><a href="#安全防护建议" class="headerlink" title="安全防护建议"></a>安全防护建议</h3><ol>
+<li><strong>选择可信服务商</strong>：避免使用来源不明的代理或VPN</li>
+<li><strong>启用加密传输</strong>：优先选择支持加密的服务</li>
+<li><strong>定期更新软件</strong>：及时修复安全漏洞</li>
+<li><strong>监控网络活动</strong>：注意异常的网络行为</li>
+<li><strong>使用多重防护</strong>：结合多种安全技术</li>
+</ol>
+<h3 id="工具特性对比表"><a href="#工具特性对比表" class="headerlink" title="工具特性对比表"></a>工具特性对比表</h3><table>
+<thead>
+<tr>
+<th>工具</th>
+<th>适用场景</th>
+<th>成功率</th>
+<th>配置难度</th>
+<th>稳定性</th>
+<th>推荐指数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Burp Suite</strong></td>
+<td>Web安全测试</td>
+<td>95%+</td>
+<td>中等</td>
+<td>高</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Proxifier</strong></td>
+<td>Windows应用代理</td>
+<td>90%+</td>
+<td>简单</td>
+<td>高</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>OpenVPN</strong></td>
+<td>企业级VPN</td>
+<td>85%+</td>
+<td>困难</td>
+<td>高</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>WireGuard</strong></td>
+<td>新一代VPN</td>
+<td>90%+</td>
+<td>中等</td>
+<td>高</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>VProxid</strong></td>
+<td>Android代理</td>
+<td>85%+</td>
+<td>中等</td>
+<td>高</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+</tbody></table>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>代理和VPN都是重要的网络技术，它们在网络安全、隐私保护、内容访问等方面发挥着重要作用。相信做安全和爬虫的朋友，都有过代理和VPN的使用经验。在企业里也有一些安全软件也是运用了其中的原理对大家的网络和安全进行管控，比如某深和某T等等。</p>
+<p><strong>本文关键点</strong>：VPN工作在较低的网络层次，能够转发所有流量；而代理工作在应用层，仅能处理特定协议的流量。</p>
+<hr>
+<p><em>下一篇会分享Android代理检测与绕过技术，看看如何在移动设备上玩转这些工具</em></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章推荐</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\02\article5_ios_detection\" rel="bookmark">iOS代理检测与绕过技术：与Android的对比</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\08\29\article3_android_detection\" rel="bookmark">Android代理检测与绕过技术：攻防对抗的艺术</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\15\article11_frida_hook\" rel="bookmark">Frida Hook技术入门：从零开始掌握动态分析神器</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\16\article12_objection_usage\" rel="bookmark">Objection使用指南：基于Frida的移动安全测试神器</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\18\article13_adb_commands\" rel="bookmark">ADB命令实战指南：Android调试桥的实用技巧</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div>持续输出技术分享，您的支持将鼓励我继续创作!</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wxpay.jpg" alt="果子 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="果子 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>果子
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://ihandmine.github.io/2025/08/28/article2_proxy_vpn/" title="代理与VPN技术解析：网络安全中的双刃剑">https://ihandmine.github.io/2025/08/28/article2_proxy_vpn/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags" id="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 网络</a>
+              <a href="/tags/%E5%AE%89%E5%85%A8/" rel="tag"><i class="fa fa-tag"></i> 安全</a>
+              <a href="/tags/%E4%BB%A3%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 代理</a>
+              <a href="/tags/VPN/" rel="tag"><i class="fa fa-tag"></i> VPN</a>
+          </div>
+
+        <script type="text/javascript">
+        var tagsall=document.getElementsByClassName("post-tags")
+        for (var i = tagsall.length - 1; i >= 0; i--){
+            var tags=tagsall[i].getElementsByTagName("a");
+            for (var j = tags.length - 1; j >= 0; j--) {
+                var r=Math.floor(Math.random()*75+130);
+                var g=Math.floor(Math.random()*75+100);
+                var b=Math.floor(Math.random()*75+80);
+                tags[j].style.background = "rgb("+r+","+g+","+b+")";
+            }
+        }                        
+        </script>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/08/27/art001/" rel="prev" title="OSI七层模型详解">
+      <i class="fa fa-chevron-left"></i> OSI七层模型详解
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/08/29/article3_android_detection/" rel="next" title="Android代理检测与绕过技术：攻防对抗的艺术">
+      Android代理检测与绕过技术：攻防对抗的艺术 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BB%A3%E7%90%86%EF%BC%88Proxy%EF%BC%89%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">什么是代理（Proxy）？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">代理的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">1.2.</span> <span class="nav-text">代理的工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E7%9A%84%E7%B1%BB%E5%9E%8B%E5%92%8C%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.3.</span> <span class="nav-text">代理的类型和介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP%E4%BB%A3%E7%90%86"><span class="nav-number">1.3.1.</span> <span class="nav-text">HTTP代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTPS%E4%BB%A3%E7%90%86-%EF%BC%88HTTP-SSL-TLS%EF%BC%89"><span class="nav-number">1.3.2.</span> <span class="nav-text">HTTPS代理 （HTTP + SSL&#x2F;TLS）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SOCKS%E4%BB%A3%E7%90%86"><span class="nav-number">1.3.3.</span> <span class="nav-text">SOCKS代理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86"><span class="nav-number">1.3.4.</span> <span class="nav-text">透明代理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E5%8D%8F%E8%AE%AE%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90"><span class="nav-number">1.4.</span> <span class="nav-text">代理协议深度解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP%E4%BB%A3%E7%90%86%E7%9A%84CONNECT%E6%96%B9%E6%B3%95"><span class="nav-number">1.4.1.</span> <span class="nav-text">HTTP代理的CONNECT方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#SOCKS4-vs-SOCKS5"><span class="nav-number">1.4.2.</span> <span class="nav-text">SOCKS4 vs SOCKS5</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E8%AE%A4%E8%AF%81%E6%9C%BA%E5%88%B6"><span class="nav-number">1.4.3.</span> <span class="nav-text">代理认证机制</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFVPN%EF%BC%88Virtual-Private-Network%EF%BC%89%EF%BC%9F"><span class="nav-number">2.</span> <span class="nav-text">什么是VPN（Virtual Private Network）？</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#VPN%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">2.1.</span> <span class="nav-text">VPN的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPN%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.2.</span> <span class="nav-text">VPN的工作原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPN%E7%9A%84%E7%B1%BB%E5%9E%8B%E5%92%8C%E4%BB%8B%E7%BB%8D"><span class="nav-number">2.3.</span> <span class="nav-text">VPN的类型和介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E8%AE%BF%E9%97%AEVPN"><span class="nav-number">2.3.1.</span> <span class="nav-text">远程访问VPN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%AB%99%E7%82%B9%E5%88%B0%E7%AB%99%E7%82%B9VPN"><span class="nav-number">2.3.2.</span> <span class="nav-text">站点到站点VPN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A7%BB%E5%8A%A8VPN"><span class="nav-number">2.3.3.</span> <span class="nav-text">移动VPN</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPN%E5%8D%8F%E8%AE%AE%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90"><span class="nav-number">2.4.</span> <span class="nav-text">VPN协议深度解析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#OpenVPN%E7%9A%84TLS%E6%8F%A1%E6%89%8B"><span class="nav-number">2.4.1.</span> <span class="nav-text">OpenVPN的TLS握手</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WireGuard%E7%9A%84%E7%8E%B0%E4%BB%A3%E5%8A%A0%E5%AF%86"><span class="nav-number">2.4.2.</span> <span class="nav-text">WireGuard的现代加密</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#IPsec%E7%9A%84IKE%E5%8D%8F%E8%AE%AE"><span class="nav-number">2.4.3.</span> <span class="nav-text">IPsec的IKE协议</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E4%B8%8EVPN%E7%9A%84%E5%8C%BA%E5%88%AB%E5%AF%B9%E6%AF%94"><span class="nav-number">3.</span> <span class="nav-text">代理与VPN的区别对比</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%8F%E8%AE%AE%E5%B1%82%E9%9D%A2%E5%B7%AE%E5%BC%82%EF%BC%88%E4%B9%8B%E5%89%8D%E7%9A%84%E6%96%87%E7%AB%A0%E6%9C%89%E6%8F%90%E5%89%8D%E8%AE%B2ISO%E4%B8%83%E5%B1%82%E6%A8%A1%E5%9E%8B%EF%BC%8C%E6%9C%89%E7%82%B9%E6%87%B5%E7%9A%84%E5%BE%80%E5%89%8D%E7%BF%BB%E7%BF%BB%EF%BC%89"><span class="nav-number">3.1.</span> <span class="nav-text">协议层面差异（之前的文章有提前讲ISO七层模型，有点懵的往前翻翻）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E7%89%B9%E6%80%A7%E5%AF%B9%E6%AF%94"><span class="nav-number">3.2.</span> <span class="nav-text">功能特性对比</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.</span> <span class="nav-text">实际应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.1.</span> <span class="nav-text">代理的应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Web%E7%88%AC%E8%99%AB"><span class="nav-number">4.1.1.</span> <span class="nav-text">Web爬虫</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%86%85%E5%AE%B9%E8%AE%BF%E9%97%AE"><span class="nav-number">4.1.2.</span> <span class="nav-text">内容访问</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E5%AE%A1%E8%AE%A1"><span class="nav-number">4.1.3.</span> <span class="nav-text">安全审计</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B8%B8%E6%88%8F%E5%8A%A0%E9%80%9F%E5%99%A8"><span class="nav-number">4.1.4.</span> <span class="nav-text">游戏加速器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPN%E7%9A%84%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">4.2.</span> <span class="nav-text">VPN的应用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E5%8A%9E%E5%85%AC"><span class="nav-number">4.2.1.</span> <span class="nav-text">远程办公</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E4%BF%9D%E6%8A%A4"><span class="nav-number">4.2.2.</span> <span class="nav-text">数据保护</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BC%81%E4%B8%9A%E7%BA%A7%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">4.2.3.</span> <span class="nav-text">企业级解决方案</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Burp-Suite-Proxifier-%E5%B7%A5%E5%85%B7%E7%AE%80%E5%8D%95%E4%BB%8B%E7%BB%8D%E4%B8%80%E4%B8%8B"><span class="nav-number">5.</span> <span class="nav-text">Burp Suite + Proxifier 工具简单介绍一下</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Burp-Suite%E4%BD%BF%E7%94%A8%E5%85%A5%E9%97%A8"><span class="nav-number">5.1.</span> <span class="nav-text">Burp Suite使用入门</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE"><span class="nav-number">5.1.1.</span> <span class="nav-text">基本配置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Proxifier%E4%BD%BF%E7%94%A8%E5%85%A5%E9%97%A8"><span class="nav-number">5.2.</span> <span class="nav-text">Proxifier使用入门</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E9%85%8D%E7%BD%AE-1"><span class="nav-number">5.2.1.</span> <span class="nav-text">基本配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E5%8A%9F%E8%83%BD"><span class="nav-number">5.2.2.</span> <span class="nav-text">高级功能</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96%E6%8A%80%E5%B7%A7"><span class="nav-number">6.</span> <span class="nav-text">性能优化技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E8%BF%9E%E6%8E%A5%E6%B1%A0%E7%AE%A1%E7%90%86"><span class="nav-number">6.1.</span> <span class="nav-text">代理连接池管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPN%E9%9A%A7%E9%81%93%E4%BC%98%E5%8C%96"><span class="nav-number">6.2.</span> <span class="nav-text">VPN隧道优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1%E7%AD%96%E7%95%A5"><span class="nav-number">6.3.</span> <span class="nav-text">负载均衡策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A3%80%E6%B5%8B%E4%B8%8E%E5%8F%8D%E6%A3%80%E6%B5%8B"><span class="nav-number">7.</span> <span class="nav-text">检测与反检测</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E6%A3%80%E6%B5%8B%E6%96%B9%E6%B3%95"><span class="nav-number">7.1.</span> <span class="nav-text">代理检测方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPN%E6%B5%81%E9%87%8F%E7%89%B9%E5%BE%81"><span class="nav-number">7.2.</span> <span class="nav-text">VPN流量特征</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%95%E8%BF%87%E6%8A%80%E6%9C%AF"><span class="nav-number">7.3.</span> <span class="nav-text">绕过技术</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E9%A3%8E%E9%99%A9%E4%B8%8E%E9%98%B2%E6%8A%A4"><span class="nav-number">8.</span> <span class="nav-text">安全风险与防护</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A3%E7%90%86%E7%9A%84%E5%AE%89%E5%85%A8%E9%A3%8E%E9%99%A9"><span class="nav-number">8.1.</span> <span class="nav-text">代理的安全风险</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#VPN%E7%9A%84%E5%AE%89%E5%85%A8%E9%A3%8E%E9%99%A9"><span class="nav-number">8.2.</span> <span class="nav-text">VPN的安全风险</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E9%98%B2%E6%8A%A4%E5%BB%BA%E8%AE%AE"><span class="nav-number">8.3.</span> <span class="nav-text">安全防护建议</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E7%89%B9%E6%80%A7%E5%AF%B9%E6%AF%94%E8%A1%A8"><span class="nav-number">8.4.</span> <span class="nav-text">工具特性对比表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="果子"
+      src="/images/gzhavatar.jpg">
+  <p class="site-author-name" itemprop="name">果子</p>
+  <div class="site-description" itemprop="description">简单正直</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ihandmine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ihandmine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/handmine@outlook.com" title="E-Mail → handmine@outlook.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果子</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">221k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:21</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/tororo.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

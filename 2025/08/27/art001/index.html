@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/OIP.jpg">
+  <link rel="mask-icon" href="/images/OIP.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ihandmine.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="什么是OSI七层模型？简单来说，OSI七层模型就是国际标准化组织（ISO）制定的一个网络通信标准。它把网络通信过程分成了七个层次，每一层都有自己特定的”工作职责”。 想象一下，网络通信就像快递送包裹一样，需要经过多个环节：打包、贴标签、装车、运输、卸货、分拣、最后送到收件人手里。每一层就相当于一个环节，各司其职。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OSI七层模型详解">
+<meta property="og:url" content="https://ihandmine.github.io/2025/08/27/art001/index.html">
+<meta property="og:site_name" content="一枚酸心果子">
+<meta property="og:description" content="什么是OSI七层模型？简单来说，OSI七层模型就是国际标准化组织（ISO）制定的一个网络通信标准。它把网络通信过程分成了七个层次，每一层都有自己特定的”工作职责”。 想象一下，网络通信就像快递送包裹一样，需要经过多个环节：打包、贴标签、装车、运输、卸货、分拣、最后送到收件人手里。每一层就相当于一个环节，各司其职。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://sanshiok.com/img/20231219/20231219092430.png">
+<meta property="article:published_time" content="2025-08-27T07:24:44.000Z">
+<meta property="article:modified_time" content="2025-10-17T03:38:20.624Z">
+<meta property="article:author" content="果子">
+<meta property="article:tag" content="网络">
+<meta property="article:tag" content="协议">
+<meta property="article:tag" content="模型">
+<meta property="article:tag" content="详解">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://sanshiok.com/img/20231219/20231219092430.png">
+
+<link rel="canonical" href="https://ihandmine.github.io/2025/08/27/art001/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>OSI七层模型详解 | 一枚酸心果子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一枚酸心果子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">果子果子果子果子果子~~~</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">21</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/ihandmine" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/08/27/art001/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          OSI七层模型详解
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-27 15:24:44" itemprop="dateCreated datePublished" datetime="2025-08-27T15:24:44+08:00">2025-08-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:38:20" itemprop="dateModified" datetime="2025-10-17T11:38:20+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%8D%8F%E8%AE%AE/" itemprop="url" rel="index"><span itemprop="name">网络协议</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="什么是OSI七层模型？"><a href="#什么是OSI七层模型？" class="headerlink" title="什么是OSI七层模型？"></a>什么是OSI七层模型？</h2><p>简单来说，<strong>OSI七层模型</strong>就是国际标准化组织（ISO）制定的一个网络通信标准。它把网络通信过程分成了七个层次，每一层都有自己特定的”工作职责”。</p>
+<p>想象一下，网络通信就像快递送包裹一样，需要经过多个环节：打包、贴标签、装车、运输、卸货、分拣、最后送到收件人手里。每一层就相当于一个环节，各司其职。</p>
+<span id="more"></span>
+<h2 id="七层模型详解"><a href="#七层模型详解" class="headerlink" title="七层模型详解"></a>七层模型详解</h2><p><img src="https://sanshiok.com/img/20231219/20231219092430.png" alt="OSI七层模型详解"></p>
+<p><em>图1：OSI七层模型各层功能及对应的协议、设备对照表</em></p>
+<p><strong>说明</strong>：这张图展示了OSI七层模型中每一层的具体功能、对应的协议和设备，帮助我们更好地理解网络通信的分层结构。</p>
+<h3 id="第7层：应用层（Application-Layer）"><a href="#第7层：应用层（Application-Layer）" class="headerlink" title="第7层：应用层（Application Layer）"></a>第7层：应用层（Application Layer）</h3><p><strong>功能</strong>：为用户提供网络服务接口<br><strong>协议</strong>：HTTP、HTTPS、FTP、SMTP、DNS等<br><strong>设备</strong>：应用程序、Web浏览器、邮件客户端<br><strong>作用</strong>：直接与用户交互，提供各种网络应用服务</p>
+<p><strong>通俗理解</strong>：这一层就像我们平时使用的各种APP，比如微信、淘宝、浏览器等。它们直接和我们打交道，我们点击什么，它们就执行什么。</p>
+<h3 id="第6层：表示层（Presentation-Layer）"><a href="#第6层：表示层（Presentation-Layer）" class="headerlink" title="第6层：表示层（Presentation Layer）"></a>第6层：表示层（Presentation Layer）</h3><p><strong>功能</strong>：处理数据格式转换、加密和压缩<br><strong>协议</strong>：SSL&#x2F;TLS、JPEG、MPEG等<br><strong>作用</strong>：确保数据能够被正确解释和处理</p>
+<p><strong>重要知识点</strong>：HTTPS协议实际上是HTTP+SSL的组合</p>
+<ul>
+<li>SSL工作在表示层，负责数据加密</li>
+<li>HTTP工作在应用层，负责数据传输</li>
+<li>数据封装是自下而上的过程</li>
+</ul>
+<p><strong>通俗理解</strong>：这一层就像翻译官，负责把数据转换成对方能理解的格式。比如把中文翻译成英文，或者把明文加密成密文。</p>
+<h3 id="第5层：会话层（Session-Layer）"><a href="#第5层：会话层（Session-Layer）" class="headerlink" title="第5层：会话层（Session Layer）"></a>第5层：会话层（Session Layer）</h3><p><strong>功能</strong>：建立、管理和终止会话<br><strong>协议</strong>：NetBIOS、RPC等<br><strong>作用</strong>：协调不同设备之间的通信和同步</p>
+<p><strong>通俗理解</strong>：这一层就像会议主持人，负责安排会议的开始、进行和结束，确保大家能有序地交流。</p>
+<h3 id="第4层：传输层（Transport-Layer）"><a href="#第4层：传输层（Transport-Layer）" class="headerlink" title="第4层：传输层（Transport Layer）"></a>第4层：传输层（Transport Layer）</h3><p><strong>功能</strong>：提供端到端的数据传输服务<br><strong>协议</strong>：TCP、UDP<br><strong>作用</strong>：确保数据的可靠性和完整性</p>
+<p><strong>通俗理解</strong>：这一层就像快递员，负责把数据包从发送方安全地送到接收方。TCP就像顺丰，保证不丢件；UDP就像普通快递，速度快但可能丢件。</p>
+<h3 id="第3层：网络层（Network-Layer）"><a href="#第3层：网络层（Network-Layer）" class="headerlink" title="第3层：网络层（Network Layer）"></a>第3层：网络层（Network Layer）</h3><p><strong>功能</strong>：处理数据包的路由和寻址<br><strong>协议</strong>：IP、ICMP、ARP等<br><strong>设备</strong>：路由器<br><strong>作用</strong>：确定数据在网络中的最佳传输路径</p>
+<p><strong>通俗理解</strong>：这一层就像导航系统，负责规划从A点到B点的最佳路线，告诉数据包应该往哪个方向走。</p>
+<h3 id="第2层：数据链路层（Data-Link-Layer）"><a href="#第2层：数据链路层（Data-Link-Layer）" class="headerlink" title="第2层：数据链路层（Data Link Layer）"></a>第2层：数据链路层（Data Link Layer）</h3><p><strong>功能</strong>：在直接连接的设备间传输数据帧<br><strong>协议</strong>：以太网、WiFi、PPP等<br><strong>设备</strong>：交换机、网桥<br><strong>作用</strong>：处理错误检测和纠正</p>
+<p><strong>通俗理解</strong>：这一层就像小区内的道路，负责在相邻设备之间传输数据，比如从你家到邻居家的网络连接。</p>
+<h3 id="第1层：物理层（Physical-Layer）"><a href="#第1层：物理层（Physical-Layer）" class="headerlink" title="第1层：物理层（Physical Layer）"></a>第1层：物理层（Physical Layer）</h3><p><strong>功能</strong>：处理物理连接和传输介质<br><strong>设备</strong>：网卡、电缆、光纤、无线设备<br><strong>作用</strong>：将数字信号转换为物理信号进行传输</p>
+<p><strong>通俗理解</strong>：这一层就像实际的马路、电线、光纤等物理设施，是网络通信的物质基础。</p>
+<h2 id="数据封装过程"><a href="#数据封装过程" class="headerlink" title="数据封装过程"></a>数据封装过程</h2><p>数据在网络传输过程中的封装遵循”自下而上”的原则，就像搭积木一样，从底层开始一层层往上搭：</p>
+<ol>
+<li><strong>应用层</strong>：生成原始数据（比如你要发送的微信消息）</li>
+<li><strong>表示层</strong>：添加加密、压缩等处理（把消息加密）</li>
+<li><strong>会话层</strong>：建立会话标识（标记这是哪次对话）</li>
+<li><strong>传输层</strong>：添加端口号信息（标记发送到哪个端口）</li>
+<li><strong>网络层</strong>：添加IP地址信息（标记发送到哪个IP）</li>
+<li><strong>数据链路层</strong>：添加MAC地址信息（标记发送到哪个网卡）</li>
+<li><strong>物理层</strong>：转换为电信号或光信号（通过网线或WiFi发送）</li>
+</ol>
+<h2 id="网络安全启示"><a href="#网络安全启示" class="headerlink" title="网络安全启示"></a>网络安全启示</h2><p>理解OSI七层模型对网络安全有什么帮助呢？</p>
+<ul>
+<li><strong>分层防护</strong>：每一层都可以实施相应的安全措施，就像每层楼都有不同的防盗门</li>
+<li><strong>攻击定位</strong>：通过分析攻击特征，可以快速定位到具体的网络层次，就像知道小偷是从哪层楼进来的</li>
+<li><strong>绕过策略</strong>：如果上层有检测机制，可以在下层进行绕过，这就是我们后续要掌握的核心技术！</li>
+</ul>
+<h2 id="实际应用场景"><a href="#实际应用场景" class="headerlink" title="实际应用场景"></a>实际应用场景</h2><p>在Android应用开发中，开发者经常在不同层次添加安全检测：</p>
+<ul>
+<li><strong>应用层</strong>：API调用频率限制（防止你刷屏）</li>
+<li><strong>传输层</strong>：SSL证书验证（确保连接安全）</li>
+<li><strong>网络层</strong>：IP地址白名单（只允许特定地区访问）</li>
+<li><strong>数据链路层</strong>：MAC地址绑定（绑定特定设备）</li>
+</ul>
+<h2 id="网络配置实践：OSI七层命令相关"><a href="#网络配置实践：OSI七层命令相关" class="headerlink" title="网络配置实践：OSI七层命令相关"></a>网络配置实践：OSI七层命令相关</h2><p>上面是来源网络和AI相关的理论常识，现在通过一些简单的网络配置命令，更好地认识OSI七层模型在实际网络中的作用。</p>
+<h3 id="物理层和数据链路层实践"><a href="#物理层和数据链路层实践" class="headerlink" title="物理层和数据链路层实践"></a>物理层和数据链路层实践</h3><h4 id="查看网络接口信息"><a href="#查看网络接口信息" class="headerlink" title="查看网络接口信息"></a>查看网络接口信息</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Windows系统</span></span><br><span class="line">ipconfig /all</span><br><span class="line"></span><br><span class="line"><span class="comment"># Linux/macOS系统</span></span><br><span class="line">ifconfig</span><br><span class="line"><span class="comment"># 或者使用新命令</span></span><br><span class="line">ip addr show</span><br></pre></td></tr></table></figure>
+
+<p><strong>命令解释</strong>：这个命令可以查看所有网络接口的详细信息，包括：</p>
+<ul>
+<li>网卡名称（如eth0、wlan0）</li>
+<li>MAC地址（物理地址）</li>
+<li>IP地址和子网掩码</li>
+<li>网络状态（UP&#x2F;DOWN）</li>
+</ul>
+<h4 id="检查网络连接状态"><a href="#检查网络连接状态" class="headerlink" title="检查网络连接状态"></a>检查网络连接状态</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Windows系统</span></span><br><span class="line">netsh interface show interface</span><br><span class="line"></span><br><span class="line"><span class="comment"># Linux/macOS系统</span></span><br><span class="line">ip <span class="built_in">link</span> show</span><br></pre></td></tr></table></figure>
+
+<p><strong>实践目标</strong>：认识物理层和数据链路层的作用，观察网络接口的物理状态。</p>
+<h3 id="网络层实践"><a href="#网络层实践" class="headerlink" title="网络层实践"></a>网络层实践</h3><h4 id="查看IP地址配置"><a href="#查看IP地址配置" class="headerlink" title="查看IP地址配置"></a>查看IP地址配置</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Windows系统</span></span><br><span class="line">ipconfig</span><br><span class="line"></span><br><span class="line"><span class="comment"># Linux/macOS系统</span></span><br><span class="line">ip addr</span><br></pre></td></tr></table></figure>
+
+<h4 id="测试网络连通性"><a href="#测试网络连通性" class="headerlink" title="测试网络连通性"></a>测试网络连通性</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试到目标主机的连通性</span></span><br><span class="line">ping 8.8.8.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试到域名的连通性</span></span><br><span class="line">ping www.baidu.com</span><br></pre></td></tr></table></figure>
+
+<p><strong>命令解释</strong>：<code>ping</code>命令使用ICMP协议（网络层），可以：</p>
+<ul>
+<li>测试网络连通性</li>
+<li>测量网络延迟</li>
+<li>检查网络丢包情况</li>
+</ul>
+<h4 id="查看路由表"><a href="#查看路由表" class="headerlink" title="查看路由表"></a>查看路由表</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Windows系统</span></span><br><span class="line">route <span class="built_in">print</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Linux/macOS系统</span></span><br><span class="line">route -n</span><br><span class="line"><span class="comment"># 或者使用新命令</span></span><br><span class="line">ip route show</span><br></pre></td></tr></table></figure>
+
+<p><strong>实践目标</strong>：认识网络层如何决定数据包的传输路径。</p>
+<h3 id="传输层实践"><a href="#传输层实践" class="headerlink" title="传输层实践"></a>传输层实践</h3><h4 id="查看端口使用情况"><a href="#查看端口使用情况" class="headerlink" title="查看端口使用情况"></a>查看端口使用情况</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Windows系统</span></span><br><span class="line">netstat -an</span><br><span class="line"></span><br><span class="line"><span class="comment"># Linux/macOS系统</span></span><br><span class="line">netstat -tuln</span><br><span class="line"><span class="comment"># 或者使用新命令</span></span><br><span class="line">ss -tuln</span><br></pre></td></tr></table></figure>
+
+<p><strong>命令解释</strong>：这些命令可以查看：</p>
+<ul>
+<li>哪些端口正在监听</li>
+<li>哪些端口正在使用</li>
+<li>TCP和UDP连接状态</li>
+</ul>
+<h4 id="测试特定端口连通性"><a href="#测试特定端口连通性" class="headerlink" title="测试特定端口连通性"></a>测试特定端口连通性</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试Web服务器端口</span></span><br><span class="line">telnet www.baidu.com 80</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者使用nc命令（Linux/macOS）</span></span><br><span class="line">nc -zv www.baidu.com 80</span><br></pre></td></tr></table></figure>
+
+<p><strong>实践目标</strong>：认识传输层如何管理端到端的连接。</p>
+<h3 id="应用层实践"><a href="#应用层实践" class="headerlink" title="应用层实践"></a>应用层实践</h3><h4 id="测试DNS解析"><a href="#测试DNS解析" class="headerlink" title="测试DNS解析"></a>测试DNS解析</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Windows系统</span></span><br><span class="line">nslookup www.baidu.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># Linux/macOS系统</span></span><br><span class="line">dig www.baidu.com</span><br><span class="line"><span class="comment"># 或者使用</span></span><br><span class="line">host www.baidu.com</span><br></pre></td></tr></table></figure>
+
+<p><strong>命令解释</strong>：DNS是应用层协议，负责将域名转换为IP地址。</p>
+<h4 id="测试HTTP连接"><a href="#测试HTTP连接" class="headerlink" title="测试HTTP连接"></a>测试HTTP连接</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 使用curl测试Web服务</span></span><br><span class="line">curl -I http://www.baidu.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者使用wget</span></span><br><span class="line">wget --spider http://www.baidu.com</span><br></pre></td></tr></table></figure>
+
+<p><strong>实践目标</strong>：认识应用层协议如何工作。</p>
+<h3 id="网络故障排查实践"><a href="#网络故障排查实践" class="headerlink" title="网络故障排查实践"></a>网络故障排查实践</h3><h4 id="分层排查网络问题"><a href="#分层排查网络问题" class="headerlink" title="分层排查网络问题"></a>分层排查网络问题</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 第一步：检查物理连接</span></span><br><span class="line">ping 127.0.0.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第二步：检查本地网络</span></span><br><span class="line">ping 192.168.1.1  <span class="comment"># 假设这是你的路由器IP</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 第三步：检查外网连接</span></span><br><span class="line">ping 8.8.8.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第四步：检查DNS解析</span></span><br><span class="line">nslookup www.baidu.com</span><br><span class="line"></span><br><span class="line"><span class="comment"># 第五步：检查应用服务</span></span><br><span class="line">curl http://www.baidu.com</span><br></pre></td></tr></table></figure>
+
+<p><strong>排查逻辑</strong>：按照OSI七层模型，从底层到高层逐步排查：</p>
+<ol>
+<li><strong>物理层</strong>：检查网线、WiFi连接</li>
+<li><strong>数据链路层</strong>：检查网卡状态</li>
+<li><strong>网络层</strong>：检查IP配置和路由</li>
+<li><strong>传输层</strong>：检查端口和连接</li>
+<li><strong>应用层</strong>：检查具体服务</li>
+</ol>
+<h3 id="高级网络配置"><a href="#高级网络配置" class="headerlink" title="高级网络配置"></a>高级网络配置</h3><h4 id="配置静态IP地址"><a href="#配置静态IP地址" class="headerlink" title="配置静态IP地址"></a>配置静态IP地址</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Windows系统（管理员权限）</span></span><br><span class="line">netsh interface ip <span class="built_in">set</span> address <span class="string">&quot;以太网&quot;</span> static 192.168.1.100 255.255.255.0 192.168.1.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># Linux系统</span></span><br><span class="line"><span class="built_in">sudo</span> ip addr add 192.168.1.100/24 dev eth0</span><br><span class="line"><span class="built_in">sudo</span> ip route add default via 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<h4 id="配置DNS服务器"><a href="#配置DNS服务器" class="headerlink" title="配置DNS服务器"></a>配置DNS服务器</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Windows系统</span></span><br><span class="line">netsh interface ip <span class="built_in">set</span> dns <span class="string">&quot;以太网&quot;</span> static 8.8.8.8</span><br><span class="line"></span><br><span class="line"><span class="comment"># Linux系统</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;nameserver 8.8.8.8&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/resolv.conf</span><br></pre></td></tr></table></figure>
+
+<h3 id="常见问题解决"><a href="#常见问题解决" class="headerlink" title="常见问题解决"></a>常见问题解决</h3><h4 id="问题1：网络连接失败"><a href="#问题1：网络连接失败" class="headerlink" title="问题1：网络连接失败"></a>问题1：网络连接失败</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查网络接口状态</span></span><br><span class="line">ip <span class="built_in">link</span> show</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启网络接口</span></span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> eth0 down</span><br><span class="line"><span class="built_in">sudo</span> ip <span class="built_in">link</span> <span class="built_in">set</span> eth0 up</span><br></pre></td></tr></table></figure>
+
+<h4 id="问题2：DNS解析失败"><a href="#问题2：DNS解析失败" class="headerlink" title="问题2：DNS解析失败"></a>问题2：DNS解析失败</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 更换DNS服务器</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;nameserver 114.114.114.114&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/resolv.conf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 或者使用Google DNS</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;nameserver 8.8.8.8&quot;</span> | <span class="built_in">sudo</span> <span class="built_in">tee</span> /etc/resolv.conf</span><br></pre></td></tr></table></figure>
+
+<h4 id="问题3：路由问题"><a href="#问题3：路由问题" class="headerlink" title="问题3：路由问题"></a>问题3：路由问题</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看路由表</span></span><br><span class="line">ip route show</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加默认路由</span></span><br><span class="line"><span class="built_in">sudo</span> ip route add default via 192.168.1.1</span><br></pre></td></tr></table></figure>
+
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>OSI七层模型虽然听起来复杂，但其实就是一个网络通信的”工作分工表”。认识每一层的功能，不仅有助于我们排查网络问题，更是进行网络安全分析和渗透测试的必备知识。</p>
+<p><strong>本文的一个关键点</strong>：数据封装是自下而上的，上层检测可以在下层绕过。这个原理就像”道高一尺，魔高一丈”，检测技术在不断升级，我们的绕过技术也要跟着升级！</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章推荐</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\08\28\article2_proxy_vpn\" rel="bookmark">代理与VPN技术解析：网络安全中的双刃剑</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\04\article7_ssl_tls_analysis\" rel="bookmark">SSL/TLS协议解析：从握手到证书固定</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div>持续输出技术分享，您的支持将鼓励我继续创作!</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wxpay.jpg" alt="果子 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="果子 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>果子
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://ihandmine.github.io/2025/08/27/art001/" title="OSI七层模型详解">https://ihandmine.github.io/2025/08/27/art001/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags" id="post-tags">
+              <a href="/tags/%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 网络</a>
+              <a href="/tags/%E5%8D%8F%E8%AE%AE/" rel="tag"><i class="fa fa-tag"></i> 协议</a>
+              <a href="/tags/%E6%A8%A1%E5%9E%8B/" rel="tag"><i class="fa fa-tag"></i> 模型</a>
+              <a href="/tags/%E8%AF%A6%E8%A7%A3/" rel="tag"><i class="fa fa-tag"></i> 详解</a>
+          </div>
+
+        <script type="text/javascript">
+        var tagsall=document.getElementsByClassName("post-tags")
+        for (var i = tagsall.length - 1; i >= 0; i--){
+            var tags=tagsall[i].getElementsByTagName("a");
+            for (var j = tags.length - 1; j >= 0; j--) {
+                var r=Math.floor(Math.random()*75+130);
+                var g=Math.floor(Math.random()*75+100);
+                var b=Math.floor(Math.random()*75+80);
+                tags[j].style.background = "rgb("+r+","+g+","+b+")";
+            }
+        }                        
+        </script>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/08/15/article9_android_root_tools/" rel="prev" title="Android Root工具原理深度解析：从Magisk到KernelSU的技术演进">
+      <i class="fa fa-chevron-left"></i> Android Root工具原理深度解析：从Magisk到KernelSU的技术演进
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/08/28/article2_proxy_vpn/" rel="next" title="代理与VPN技术解析：网络安全中的双刃剑">
+      代理与VPN技术解析：网络安全中的双刃剑 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFOSI%E4%B8%83%E5%B1%82%E6%A8%A1%E5%9E%8B%EF%BC%9F"><span class="nav-number">1.</span> <span class="nav-text">什么是OSI七层模型？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E5%B1%82%E6%A8%A1%E5%9E%8B%E8%AF%A6%E8%A7%A3"><span class="nav-number">2.</span> <span class="nav-text">七层模型详解</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC7%E5%B1%82%EF%BC%9A%E5%BA%94%E7%94%A8%E5%B1%82%EF%BC%88Application-Layer%EF%BC%89"><span class="nav-number">2.1.</span> <span class="nav-text">第7层：应用层（Application Layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC6%E5%B1%82%EF%BC%9A%E8%A1%A8%E7%A4%BA%E5%B1%82%EF%BC%88Presentation-Layer%EF%BC%89"><span class="nav-number">2.2.</span> <span class="nav-text">第6层：表示层（Presentation Layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC5%E5%B1%82%EF%BC%9A%E4%BC%9A%E8%AF%9D%E5%B1%82%EF%BC%88Session-Layer%EF%BC%89"><span class="nav-number">2.3.</span> <span class="nav-text">第5层：会话层（Session Layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC4%E5%B1%82%EF%BC%9A%E4%BC%A0%E8%BE%93%E5%B1%82%EF%BC%88Transport-Layer%EF%BC%89"><span class="nav-number">2.4.</span> <span class="nav-text">第4层：传输层（Transport Layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC3%E5%B1%82%EF%BC%9A%E7%BD%91%E7%BB%9C%E5%B1%82%EF%BC%88Network-Layer%EF%BC%89"><span class="nav-number">2.5.</span> <span class="nav-text">第3层：网络层（Network Layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC2%E5%B1%82%EF%BC%9A%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82%EF%BC%88Data-Link-Layer%EF%BC%89"><span class="nav-number">2.6.</span> <span class="nav-text">第2层：数据链路层（Data Link Layer）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%AC%AC1%E5%B1%82%EF%BC%9A%E7%89%A9%E7%90%86%E5%B1%82%EF%BC%88Physical-Layer%EF%BC%89"><span class="nav-number">2.7.</span> <span class="nav-text">第1层：物理层（Physical Layer）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%B0%81%E8%A3%85%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">数据封装过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8%E5%90%AF%E7%A4%BA"><span class="nav-number">4.</span> <span class="nav-text">网络安全启示</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">5.</span> <span class="nav-text">实际应用场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE%E5%AE%9E%E8%B7%B5%EF%BC%9AOSI%E4%B8%83%E5%B1%82%E5%91%BD%E4%BB%A4%E7%9B%B8%E5%85%B3"><span class="nav-number">6.</span> <span class="nav-text">网络配置实践：OSI七层命令相关</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E5%B1%82%E5%92%8C%E6%95%B0%E6%8D%AE%E9%93%BE%E8%B7%AF%E5%B1%82%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.1.</span> <span class="nav-text">物理层和数据链路层实践</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E7%BD%91%E7%BB%9C%E6%8E%A5%E5%8F%A3%E4%BF%A1%E6%81%AF"><span class="nav-number">6.1.1.</span> <span class="nav-text">查看网络接口信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A3%80%E6%9F%A5%E7%BD%91%E7%BB%9C%E8%BF%9E%E6%8E%A5%E7%8A%B6%E6%80%81"><span class="nav-number">6.1.2.</span> <span class="nav-text">检查网络连接状态</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E5%B1%82%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.2.</span> <span class="nav-text">网络层实践</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8BIP%E5%9C%B0%E5%9D%80%E9%85%8D%E7%BD%AE"><span class="nav-number">6.2.1.</span> <span class="nav-text">查看IP地址配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%BD%91%E7%BB%9C%E8%BF%9E%E9%80%9A%E6%80%A7"><span class="nav-number">6.2.2.</span> <span class="nav-text">测试网络连通性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E8%B7%AF%E7%94%B1%E8%A1%A8"><span class="nav-number">6.2.3.</span> <span class="nav-text">查看路由表</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%A0%E8%BE%93%E5%B1%82%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.3.</span> <span class="nav-text">传输层实践</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E7%AB%AF%E5%8F%A3%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5"><span class="nav-number">6.3.1.</span> <span class="nav-text">查看端口使用情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%89%B9%E5%AE%9A%E7%AB%AF%E5%8F%A3%E8%BF%9E%E9%80%9A%E6%80%A7"><span class="nav-number">6.3.2.</span> <span class="nav-text">测试特定端口连通性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E5%B1%82%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.4.</span> <span class="nav-text">应用层实践</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95DNS%E8%A7%A3%E6%9E%90"><span class="nav-number">6.4.1.</span> <span class="nav-text">测试DNS解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95HTTP%E8%BF%9E%E6%8E%A5"><span class="nav-number">6.4.2.</span> <span class="nav-text">测试HTTP连接</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E6%95%85%E9%9A%9C%E6%8E%92%E6%9F%A5%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.5.</span> <span class="nav-text">网络故障排查实践</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%86%E5%B1%82%E6%8E%92%E6%9F%A5%E7%BD%91%E7%BB%9C%E9%97%AE%E9%A2%98"><span class="nav-number">6.5.1.</span> <span class="nav-text">分层排查网络问题</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E7%BD%91%E7%BB%9C%E9%85%8D%E7%BD%AE"><span class="nav-number">6.6.</span> <span class="nav-text">高级网络配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E9%9D%99%E6%80%81IP%E5%9C%B0%E5%9D%80"><span class="nav-number">6.6.1.</span> <span class="nav-text">配置静态IP地址</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEDNS%E6%9C%8D%E5%8A%A1%E5%99%A8"><span class="nav-number">6.6.2.</span> <span class="nav-text">配置DNS服务器</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3"><span class="nav-number">6.7.</span> <span class="nav-text">常见问题解决</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%981%EF%BC%9A%E7%BD%91%E7%BB%9C%E8%BF%9E%E6%8E%A5%E5%A4%B1%E8%B4%A5"><span class="nav-number">6.7.1.</span> <span class="nav-text">问题1：网络连接失败</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%982%EF%BC%9ADNS%E8%A7%A3%E6%9E%90%E5%A4%B1%E8%B4%A5"><span class="nav-number">6.7.2.</span> <span class="nav-text">问题2：DNS解析失败</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%97%AE%E9%A2%983%EF%BC%9A%E8%B7%AF%E7%94%B1%E9%97%AE%E9%A2%98"><span class="nav-number">6.7.3.</span> <span class="nav-text">问题3：路由问题</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">7.</span> <span class="nav-text">结语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="果子"
+      src="/images/gzhavatar.jpg">
+  <p class="site-author-name" itemprop="name">果子</p>
+  <div class="site-description" itemprop="description">简单正直</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ihandmine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ihandmine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/handmine@outlook.com" title="E-Mail → handmine@outlook.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果子</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">221k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:21</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/tororo.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

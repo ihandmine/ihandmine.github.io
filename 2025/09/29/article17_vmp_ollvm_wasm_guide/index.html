@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/OIP.jpg">
+  <link rel="mask-icon" href="/images/OIP.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ihandmine.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="一、技术概述1. VMP（VMProtect）VMP是一款商业化的代码保护工具，通过虚拟机技术将原始代码转换为虚拟机字节码，实现代码的加密和混淆保护。 核心特性：  虚拟机保护：将x86&#x2F;x64指令转换为虚拟机字节码 代码加密：运行时动态解密执行 反调试：内置多种反调试机制 完整性校验：防止代码被篡改">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VMP、JSVMP、OLLVM、WASM技术解析：从虚拟机保护到字节码混淆">
+<meta property="og:url" content="https://ihandmine.github.io/2025/09/29/article17_vmp_ollvm_wasm_guide/index.html">
+<meta property="og:site_name" content="一枚酸心果子">
+<meta property="og:description" content="一、技术概述1. VMP（VMProtect）VMP是一款商业化的代码保护工具，通过虚拟机技术将原始代码转换为虚拟机字节码，实现代码的加密和混淆保护。 核心特性：  虚拟机保护：将x86&#x2F;x64指令转换为虚拟机字节码 代码加密：运行时动态解密执行 反调试：内置多种反调试机制 完整性校验：防止代码被篡改">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-29T07:24:44.000Z">
+<meta property="article:modified_time" content="2025-10-17T03:46:46.844Z">
+<meta property="article:author" content="果子">
+<meta property="article:tag" content="VMP">
+<meta property="article:tag" content="JSVMP">
+<meta property="article:tag" content="OLLVM">
+<meta property="article:tag" content="WASM">
+<meta property="article:tag" content="技术解析">
+<meta property="article:tag" content="虚拟机保护">
+<meta property="article:tag" content="字节码混淆">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://ihandmine.github.io/2025/09/29/article17_vmp_ollvm_wasm_guide/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>VMP、JSVMP、OLLVM、WASM技术解析：从虚拟机保护到字节码混淆 | 一枚酸心果子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一枚酸心果子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">果子果子果子果子果子~~~</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">21</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/ihandmine" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/09/29/article17_vmp_ollvm_wasm_guide/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VMP、JSVMP、OLLVM、WASM技术解析：从虚拟机保护到字节码混淆
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-29 15:24:44" itemprop="dateCreated datePublished" datetime="2025-09-29T15:24:44+08:00">2025-09-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:46:46" itemprop="dateModified" datetime="2025-10-17T11:46:46+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="一、技术概述"><a href="#一、技术概述" class="headerlink" title="一、技术概述"></a>一、技术概述</h2><h3 id="1-VMP（VMProtect）"><a href="#1-VMP（VMProtect）" class="headerlink" title="1. VMP（VMProtect）"></a>1. VMP（VMProtect）</h3><p><strong>VMP</strong>是一款商业化的代码保护工具，通过虚拟机技术将原始代码转换为虚拟机字节码，实现代码的加密和混淆保护。</p>
+<p><strong>核心特性</strong>：</p>
+<ul>
+<li><strong>虚拟机保护</strong>：将x86&#x2F;x64指令转换为虚拟机字节码</li>
+<li><strong>代码加密</strong>：运行时动态解密执行</li>
+<li><strong>反调试</strong>：内置多种反调试机制</li>
+<li><strong>完整性校验</strong>：防止代码被篡改<span id="more"></span></li>
+</ul>
+<h3 id="2-JSVMP（JavaScript-Virtual-Machine-Protection）"><a href="#2-JSVMP（JavaScript-Virtual-Machine-Protection）" class="headerlink" title="2. JSVMP（JavaScript Virtual Machine Protection）"></a>2. JSVMP（JavaScript Virtual Machine Protection）</h3><p><strong>JSVMP</strong>是专门针对JavaScript代码的虚拟机保护技术，通过将JavaScript代码转换为自定义的虚拟机字节码来保护代码逻辑。</p>
+<p><strong>核心特性</strong>：</p>
+<ul>
+<li><strong>JavaScript虚拟机</strong>：专门为JS代码设计的虚拟机</li>
+<li><strong>字节码转换</strong>：将JS代码转换为虚拟机字节码</li>
+<li><strong>反调试保护</strong>：检测浏览器调试工具</li>
+<li><strong>代码混淆</strong>：结合传统混淆技术</li>
+</ul>
+<h3 id="3-OLLVM（Obfuscator-LLVM）"><a href="#3-OLLVM（Obfuscator-LLVM）" class="headerlink" title="3. OLLVM（Obfuscator-LLVM）"></a>3. OLLVM（Obfuscator-LLVM）</h3><p><strong>OLLVM</strong>是基于LLVM编译器的开源代码混淆框架，在编译时对代码进行混淆处理。</p>
+<p><strong>核心特性</strong>：</p>
+<ul>
+<li><strong>控制流平坦化</strong>：将复杂的控制流转换为平坦结构</li>
+<li><strong>指令替换</strong>：用等价的复杂指令替换简单指令</li>
+<li><strong>虚假控制流</strong>：插入虚假的分支和跳转</li>
+<li><strong>函数分割</strong>：将函数拆分为多个片段</li>
+</ul>
+<h3 id="4-WASM（WebAssembly）"><a href="#4-WASM（WebAssembly）" class="headerlink" title="4. WASM（WebAssembly）"></a>4. WASM（WebAssembly）</h3><p><strong>WASM</strong>是一种低级的二进制指令格式，为Web应用提供接近原生的执行性能。</p>
+<p><strong>核心特性</strong>：</p>
+<ul>
+<li><strong>跨平台执行</strong>：支持多种操作系统和架构</li>
+<li><strong>高性能</strong>：接近原生代码的执行效率</li>
+<li><strong>安全性</strong>：沙箱执行环境，内存安全</li>
+<li><strong>可移植性</strong>：统一的二进制格式</li>
+</ul>
+<h3 id="5-技术对比图"><a href="#5-技术对比图" class="headerlink" title="5. 技术对比图"></a>5. 技术对比图</h3><pre class="mermaid">graph TB
+    A[代码保护技术] --> B[VMP虚拟机保护]
+    A --> C[JSVMP JS保护]
+    A --> D[OLLVM编译混淆]
+    A --> E[WASM字节码]
+    
+    B --> F[运行时保护]
+    B --> G[动态解密]
+    B --> H[反调试机制]
+    
+    C --> I[JS虚拟机]
+    C --> J[字节码转换]
+    C --> K[浏览器反调试]
+    
+    D --> L[编译时混淆]
+    D --> M[控制流平坦化]
+    D --> N[指令替换]
+    
+    E --> O[静态编译]
+    E --> P[沙箱执行]
+    E --> Q[跨平台支持]
+    
+    R[保护强度] --> S[VMP: 高]
+    R --> T[JSVMP: 高]
+    R --> U[OLLVM: 中]
+    R --> V[WASM: 中]
+    
+    W[性能开销] --> X[VMP: 高]
+    W --> Y[JSVMP: 中]
+    W --> Z[OLLVM: 低]
+    W --> AA[WASM: 低]</pre>
+
+<h2 id="二、VMP与JSVMP技术原理"><a href="#二、VMP与JSVMP技术原理" class="headerlink" title="二、VMP与JSVMP技术原理"></a>二、VMP与JSVMP技术原理</h2><h3 id="1-VMP虚拟机架构"><a href="#1-VMP虚拟机架构" class="headerlink" title="1. VMP虚拟机架构"></a>1. VMP虚拟机架构</h3><p>VMP采用自定义的虚拟机架构，将原始指令转换为虚拟机字节码执行。</p>
+<h4 id="a-VMP虚拟机架构图"><a href="#a-VMP虚拟机架构图" class="headerlink" title="a. VMP虚拟机架构图"></a>a. VMP虚拟机架构图</h4><pre class="mermaid">sequenceDiagram
+    participant App as 原始应用
+    participant VMP as VMP保护器
+    participant VM as 虚拟机引擎
+    participant Memory as 虚拟内存
+    
+    App->>VMP: 加载受保护代码
+    VMP->>VM: 初始化虚拟机
+    VMP->>Memory: 分配虚拟内存空间
+    
+    App->>VM: 调用受保护函数
+    VM->>VM: 解析虚拟机字节码
+    VM->>Memory: 访问虚拟寄存器
+    VM->>VM: 执行虚拟机指令
+    VM->>App: 返回执行结果
+    
+    Note over VM: 虚拟机指令集
+    VM->>VM: MOV, ADD, SUB, JMP等
+    VM->>VM: CALL, RET, PUSH, POP等</pre>
+
+<p><strong>虚拟机组件</strong>：</p>
+<ul>
+<li><strong>指令解码器</strong>：解析虚拟机字节码</li>
+<li><strong>寄存器模拟</strong>：模拟CPU寄存器</li>
+<li><strong>内存管理</strong>：管理虚拟内存空间</li>
+<li><strong>执行引擎</strong>：执行虚拟机指令</li>
+</ul>
+<h3 id="2-JSVMP虚拟机架构"><a href="#2-JSVMP虚拟机架构" class="headerlink" title="2. JSVMP虚拟机架构"></a>2. JSVMP虚拟机架构</h3><p>JSVMP专门为JavaScript代码设计，将JS代码转换为自定义的虚拟机字节码执行。</p>
+<h4 id="a-JSVMP虚拟机架构图"><a href="#a-JSVMP虚拟机架构图" class="headerlink" title="a. JSVMP虚拟机架构图"></a>a. JSVMP虚拟机架构图</h4><pre class="mermaid">sequenceDiagram
+    participant JS as JavaScript代码
+    participant Parser as JS解析器
+    participant VM as JSVMP虚拟机
+    participant Browser as 浏览器环境
+    
+    JS->>Parser: 解析JavaScript代码
+    Parser->>VM: 转换为虚拟机字节码
+    VM->>Browser: 初始化浏览器环境
+    
+    Browser->>VM: 调用受保护函数
+    VM->>VM: 解析虚拟机字节码
+    VM->>VM: 执行虚拟机指令
+    VM->>Browser: 返回执行结果
+    
+    Note over VM: JSVMP指令集
+    VM->>VM: LOAD, STORE, CALL等
+    VM->>VM: ADD, SUB, MUL, DIV等
+    VM->>VM: JMP, JZ, JNZ等</pre>
+
+<p><strong>JSVMP组件</strong>：</p>
+<ul>
+<li><strong>JS解析器</strong>：解析JavaScript代码</li>
+<li><strong>字节码生成器</strong>：生成虚拟机字节码</li>
+<li><strong>虚拟机引擎</strong>：执行字节码指令</li>
+<li><strong>浏览器接口</strong>：与浏览器环境交互</li>
+</ul>
+<h3 id="3-VMP保护机制"><a href="#3-VMP保护机制" class="headerlink" title="3. VMP保护机制"></a>3. VMP保护机制</h3><h4 id="a-代码加密流程"><a href="#a-代码加密流程" class="headerlink" title="a. 代码加密流程"></a>a. 代码加密流程</h4><pre class="mermaid">flowchart TD
+    A[原始代码] --> B[指令分析]
+    B --> C[虚拟机指令转换]
+    C --> D[字节码生成]
+    D --> E[加密处理]
+    E --> F[完整性校验]
+    F --> G[保护后代码]
+    
+    H[运行时] --> I[动态解密]
+    I --> J[虚拟机执行]
+    J --> K[结果返回]
+    
+    L[反调试检测] --> M[调试器检测]
+    L --> N[断点检测]
+    L --> O[内存检测]</pre>
+
+<p><strong>保护特点</strong>：</p>
+<ul>
+<li><strong>动态解密</strong>：代码在运行时才解密</li>
+<li><strong>完整性校验</strong>：检测代码是否被修改</li>
+<li><strong>反调试</strong>：检测调试器存在</li>
+<li><strong>时间检测</strong>：检测执行时间异常</li>
+</ul>
+<h3 id="4-JSVMP保护机制"><a href="#4-JSVMP保护机制" class="headerlink" title="4. JSVMP保护机制"></a>4. JSVMP保护机制</h3><h4 id="a-JSVMP保护流程"><a href="#a-JSVMP保护流程" class="headerlink" title="a. JSVMP保护流程"></a>a. JSVMP保护流程</h4><pre class="mermaid">flowchart TD
+    A[JavaScript代码] --> B[语法分析]
+    B --> C[字节码生成]
+    C --> D[代码混淆]
+    D --> E[反调试注入]
+    E --> F[保护后代码]
+    
+    G[浏览器执行] --> H[虚拟机初始化]
+    H --> I[字节码解析]
+    I --> J[指令执行]
+    J --> K[结果返回]
+    
+    L[反调试检测] --> M[DevTools检测]
+    L --> N[断点检测]
+    L --> O[时间检测]</pre>
+
+<p><strong>JSVMP保护特点</strong>：</p>
+<ul>
+<li><strong>字节码保护</strong>：将JS代码转换为虚拟机字节码</li>
+<li><strong>反调试检测</strong>：检测浏览器开发者工具</li>
+<li><strong>代码混淆</strong>：结合传统JS混淆技术</li>
+<li><strong>动态执行</strong>：运行时解析和执行字节码</li>
+</ul>
+<h3 id="5-VMP工作机制和原理"><a href="#5-VMP工作机制和原理" class="headerlink" title="5. VMP工作机制和原理"></a>5. VMP工作机制和原理</h3><h4 id="a-VMP伪代码示例"><a href="#a-VMP伪代码示例" class="headerlink" title="a. VMP伪代码示例"></a>a. VMP伪代码示例</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// VMP虚拟机核心伪代码</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">VMPVirtualMachine</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">uint8_t</span>* bytecode;           <span class="comment">// 虚拟机字节码</span></span><br><span class="line">    <span class="type">uint32_t</span>* registers;         <span class="comment">// 虚拟寄存器</span></span><br><span class="line">    <span class="type">uint8_t</span>* memory;             <span class="comment">// 虚拟内存</span></span><br><span class="line">    <span class="type">bool</span> isDebuggerPresent;      <span class="comment">// 反调试标志</span></span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 初始化虚拟机</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 反调试检测</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">detectDebugger</span>()) &#123;</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 分配虚拟内存</span></span><br><span class="line">        memory = <span class="built_in">malloc</span>(VM_MEMORY_SIZE);</span><br><span class="line">        registers = <span class="built_in">malloc</span>(VM_REGISTER_COUNT * <span class="number">4</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 解密字节码</span></span><br><span class="line">        bytecode = <span class="built_in">decryptBytecode</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 执行虚拟机指令</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">execute</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="type">uint32_t</span> pc = <span class="number">0</span>;  <span class="comment">// 程序计数器</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span> (pc &lt; bytecodeSize) &#123;</span><br><span class="line">            <span class="comment">// 反调试检测</span></span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">detectDebugger</span>()) &#123;</span><br><span class="line">                <span class="built_in">exit</span>(<span class="number">-1</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 解析指令</span></span><br><span class="line">            <span class="type">uint8_t</span> opcode = bytecode[pc++];</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">switch</span> (opcode) &#123;</span><br><span class="line">                <span class="keyword">case</span> VM_LOAD:</span><br><span class="line">                    <span class="comment">// LOAD指令：加载数据到寄存器</span></span><br><span class="line">                    <span class="type">uint32_t</span> reg = bytecode[pc++];</span><br><span class="line">                    <span class="type">uint32_t</span> value = *(<span class="type">uint32_t</span>*)(bytecode + pc);</span><br><span class="line">                    registers[reg] = value;</span><br><span class="line">                    pc += <span class="number">4</span>;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> VM_ADD:</span><br><span class="line">                    <span class="comment">// ADD指令：寄存器相加</span></span><br><span class="line">                    <span class="type">uint32_t</span> reg1 = bytecode[pc++];</span><br><span class="line">                    <span class="type">uint32_t</span> reg2 = bytecode[pc++];</span><br><span class="line">                    <span class="type">uint32_t</span> reg3 = bytecode[pc++];</span><br><span class="line">                    registers[reg3] = registers[reg1] + registers[reg2];</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> VM_CALL:</span><br><span class="line">                    <span class="comment">// CALL指令：调用函数</span></span><br><span class="line">                    <span class="type">uint32_t</span> funcAddr = *(<span class="type">uint32_t</span>*)(bytecode + pc);</span><br><span class="line">                    <span class="built_in">callFunction</span>(funcAddr);</span><br><span class="line">                    pc += <span class="number">4</span>;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> VM_RET:</span><br><span class="line">                    <span class="comment">// RET指令：返回</span></span><br><span class="line">                    <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 反调试检测</span></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">detectDebugger</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 检测调试器</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">IsDebuggerPresent</span>()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 检测断点</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">checkBreakpoints</span>()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 时间检测</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">checkTiming</span>()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="b-VMP保护示例"><a href="#b-VMP保护示例" class="headerlink" title="b. VMP保护示例"></a>b. VMP保护示例</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原始函数</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">calculateSum</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// VMP保护后的伪代码</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">protected_calculateSum</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    VMPVirtualMachine vm;</span><br><span class="line">    vm.<span class="built_in">init</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 虚拟机字节码（伪代码）</span></span><br><span class="line">    <span class="type">uint8_t</span> bytecode[] = &#123;</span><br><span class="line">        VM_LOAD, <span class="number">0</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x0A</span>,  <span class="comment">// 加载参数a到寄存器0</span></span><br><span class="line">        VM_LOAD, <span class="number">1</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0x14</span>,  <span class="comment">// 加载参数b到寄存器1</span></span><br><span class="line">        VM_ADD, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>,                      <span class="comment">// 寄存器0+寄存器1，结果存到寄存器2</span></span><br><span class="line">        VM_RET                                <span class="comment">// 返回</span></span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    vm.<span class="built_in">setBytecode</span>(bytecode);</span><br><span class="line">    vm.<span class="built_in">execute</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 获取结果</span></span><br><span class="line">    <span class="type">int</span> result = vm.<span class="built_in">getRegister</span>(<span class="number">2</span>);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原始C++代码</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">calculateSum</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// VMP保护后的伪代码</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">protected_calculateSum</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 虚拟机初始化</span></span><br><span class="line">    VMContext vm;</span><br><span class="line">    vm.<span class="built_in">init</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 动态解密字节码</span></span><br><span class="line">    <span class="type">uint8_t</span>* bytecode = <span class="built_in">decrypt_bytecode</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 虚拟机执行</span></span><br><span class="line">    vm.<span class="built_in">execute</span>(bytecode);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 清理痕迹</span></span><br><span class="line">    vm.<span class="built_in">cleanup</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、OLLVM技术原理"><a href="#三、OLLVM技术原理" class="headerlink" title="三、OLLVM技术原理"></a>三、OLLVM技术原理</h2><h3 id="1-编译时混淆"><a href="#1-编译时混淆" class="headerlink" title="1. 编译时混淆"></a>1. 编译时混淆</h3><p>OLLVM在LLVM编译过程中对代码进行混淆处理，不改变程序功能的前提下增加逆向难度。</p>
+<h4 id="a-OLLVM混淆流程"><a href="#a-OLLVM混淆流程" class="headerlink" title="a. OLLVM混淆流程"></a>a. OLLVM混淆流程</h4><pre class="mermaid">graph LR
+    A[源代码] --> B[LLVM IR]
+    B --> C[混淆Pass]
+    C --> D[混淆后IR]
+    D --> E[目标代码]
+    
+    F[混淆技术] --> G[控制流平坦化]
+    F --> H[指令替换]
+    F --> I[虚假控制流]
+    F --> J[函数分割]
+    
+    G --> K[Switch-Case结构]
+    H --> L[复杂指令替换]
+    I --> M[虚假分支插入]
+    J --> N[函数片段化]</pre>
+
+<p><strong>混淆Pass</strong>：</p>
+<ul>
+<li><strong>Flattening Pass</strong>：控制流平坦化</li>
+<li><strong>Substitution Pass</strong>：指令替换</li>
+<li><strong>Bogus Control Flow</strong>：虚假控制流</li>
+<li><strong>Function Splitting</strong>：函数分割</li>
+</ul>
+<h3 id="2-控制流平坦化"><a href="#2-控制流平坦化" class="headerlink" title="2. 控制流平坦化"></a>2. 控制流平坦化</h3><h4 id="a-控制流平坦化原理"><a href="#a-控制流平坦化原理" class="headerlink" title="a. 控制流平坦化原理"></a>a. 控制流平坦化原理</h4><pre class="mermaid">flowchart TD
+    A[原始控制流] --> B[复杂分支结构]
+    B --> C[条件判断]
+    C --> D[多个执行路径]
+    
+    E[平坦化后] --> F[Switch-Case结构]
+    F --> G[状态变量控制]
+    G --> H[统一执行流程]
+    
+    I[状态机] --> J[状态0: 初始化]
+    I --> K[状态1: 处理A]
+    I --> L[状态2: 处理B]
+    I --> M[状态3: 结束]</pre>
+
+<p><strong>平坦化特点</strong>：</p>
+<ul>
+<li><strong>统一入口</strong>：所有代码块通过统一入口</li>
+<li><strong>状态控制</strong>：使用状态变量控制执行流程</li>
+<li><strong>跳转表</strong>：使用Switch-Case实现跳转</li>
+<li><strong>复杂度增加</strong>：大幅增加逆向分析难度</li>
+</ul>
+<h3 id="6-JSVMP工作机制和原理"><a href="#6-JSVMP工作机制和原理" class="headerlink" title="6. JSVMP工作机制和原理"></a>6. JSVMP工作机制和原理</h3><h4 id="a-JSVMP保护流程-1"><a href="#a-JSVMP保护流程-1" class="headerlink" title="a. JSVMP保护流程"></a>a. JSVMP保护流程</h4><pre class="mermaid">flowchart TD
+    A[JavaScript代码] --> B[语法分析]
+    B --> C[AST生成]
+    C --> D[字节码生成]
+    D --> E[代码混淆]
+    E --> F[反调试注入]
+    F --> G[保护后代码]
+    
+    H[浏览器执行] --> I[虚拟机初始化]
+    I --> J[字节码解析]
+    J --> K[指令执行]
+    K --> L[结果返回]
+    
+    M[反调试检测] --> N[DevTools检测]
+    M --> O[断点检测]
+    M --> P[时间检测]</pre>
+
+<h4 id="b-JSVMP伪代码示例"><a href="#b-JSVMP伪代码示例" class="headerlink" title="b. JSVMP伪代码示例"></a>b. JSVMP伪代码示例</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// JSVMP虚拟机核心伪代码</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">JSVMPVirtualMachine</span> &#123;</span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">bytecode</span> = <span class="literal">null</span>;        <span class="comment">// 虚拟机字节码</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">stack</span> = [];             <span class="comment">// 执行栈</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">registers</span> = &#123;&#125;;         <span class="comment">// 虚拟寄存器</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">globalScope</span> = &#123;&#125;;       <span class="comment">// 全局作用域</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">isDebuggerPresent</span> = <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 初始化虚拟机</span></span><br><span class="line">    <span class="title function_">init</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="comment">// 反调试检测</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="title function_">detectDebugger</span>()) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Debugger detected&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 初始化执行环境</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="title function_">setupEnvironment</span>();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 解密字节码</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">bytecode</span> = <span class="variable language_">this</span>.<span class="title function_">decryptBytecode</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 执行虚拟机指令</span></span><br><span class="line">    <span class="title function_">execute</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">let</span> pc = <span class="number">0</span>;  <span class="comment">// 程序计数器</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span> (pc &lt; <span class="variable language_">this</span>.<span class="property">bytecode</span>.<span class="property">length</span>) &#123;</span><br><span class="line">            <span class="comment">// 反调试检测</span></span><br><span class="line">            <span class="keyword">if</span> (<span class="variable language_">this</span>.<span class="title function_">detectDebugger</span>()) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Debugger detected&#x27;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 解析指令</span></span><br><span class="line">            <span class="keyword">const</span> opcode = <span class="variable language_">this</span>.<span class="property">bytecode</span>[pc++];</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">switch</span> (opcode) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="attr">JSVM_LOAD_CONST</span>:</span><br><span class="line">                    <span class="comment">// 加载常量到栈</span></span><br><span class="line">                    <span class="keyword">const</span> constIndex = <span class="variable language_">this</span>.<span class="property">bytecode</span>[pc++];</span><br><span class="line">                    <span class="keyword">const</span> value = <span class="variable language_">this</span>.<span class="property">constants</span>[constIndex];</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">push</span>(value);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="attr">JSVM_LOAD_VAR</span>:</span><br><span class="line">                    <span class="comment">// 加载变量到栈</span></span><br><span class="line">                    <span class="keyword">const</span> varName = <span class="variable language_">this</span>.<span class="property">bytecode</span>[pc++];</span><br><span class="line">                    <span class="keyword">const</span> varValue = <span class="variable language_">this</span>.<span class="title function_">getVariable</span>(varName);</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">push</span>(varValue);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="attr">JSVM_ADD</span>:</span><br><span class="line">                    <span class="comment">// 栈顶两个值相加</span></span><br><span class="line">                    <span class="keyword">const</span> b = <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">pop</span>();</span><br><span class="line">                    <span class="keyword">const</span> a = <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">pop</span>();</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">push</span>(a + b);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="attr">JSVM_CALL</span>:</span><br><span class="line">                    <span class="comment">// 调用函数</span></span><br><span class="line">                    <span class="keyword">const</span> funcName = <span class="variable language_">this</span>.<span class="property">bytecode</span>[pc++];</span><br><span class="line">                    <span class="keyword">const</span> argCount = <span class="variable language_">this</span>.<span class="property">bytecode</span>[pc++];</span><br><span class="line">                    <span class="keyword">const</span> args = [];</span><br><span class="line">                    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; argCount; i++) &#123;</span><br><span class="line">                        args.<span class="title function_">unshift</span>(<span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">pop</span>());</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">const</span> result = <span class="variable language_">this</span>.<span class="title function_">callFunction</span>(funcName, args);</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">push</span>(result);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="attr">JSVM_RETURN</span>:</span><br><span class="line">                    <span class="comment">// 返回</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">pop</span>();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 反调试检测</span></span><br><span class="line">    <span class="title function_">detectDebugger</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="comment">// 检测开发者工具</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="variable language_">window</span>.<span class="property">outerHeight</span> - <span class="variable language_">window</span>.<span class="property">innerHeight</span> &gt; <span class="number">200</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 检测断点</span></span><br><span class="line">        <span class="keyword">const</span> start = <span class="title class_">Date</span>.<span class="title function_">now</span>();</span><br><span class="line">        <span class="keyword">debugger</span>;</span><br><span class="line">        <span class="keyword">const</span> end = <span class="title class_">Date</span>.<span class="title function_">now</span>();</span><br><span class="line">        <span class="keyword">if</span> (end - start &gt; <span class="number">100</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 检测控制台</span></span><br><span class="line">        <span class="keyword">if</span> (<span class="variable language_">window</span>.<span class="property">console</span> &amp;&amp; <span class="variable language_">window</span>.<span class="property">console</span>.<span class="property">clear</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 调用函数</span></span><br><span class="line">    <span class="title function_">callFunction</span>(<span class="params">name, args</span>) &#123;</span><br><span class="line">        <span class="comment">// 模拟函数调用</span></span><br><span class="line">        <span class="keyword">switch</span> (name) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&#x27;console.log&#x27;</span>:</span><br><span class="line">                <span class="variable language_">console</span>.<span class="title function_">log</span>(...args);</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">undefined</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&#x27;Math.max&#x27;</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="title class_">Math</span>.<span class="title function_">max</span>(...args);</span><br><span class="line">            <span class="attr">default</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">globalScope</span>[name](...args);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="c-JSVMP保护示例"><a href="#c-JSVMP保护示例" class="headerlink" title="c. JSVMP保护示例"></a>c. JSVMP保护示例</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原始JavaScript代码</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">calculateSum</span>(<span class="params">a, b</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// JSVMP保护后的伪代码</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">protected_calculateSum</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> vm = <span class="keyword">new</span> <span class="title class_">JSVMPVirtualMachine</span>();</span><br><span class="line">    vm.<span class="title function_">init</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 虚拟机字节码（伪代码）</span></span><br><span class="line">    <span class="keyword">const</span> bytecode = [</span><br><span class="line">        <span class="variable constant_">JSVM_LOAD_VAR</span>, <span class="string">&#x27;a&#x27;</span>,           <span class="comment">// 加载变量a到栈</span></span><br><span class="line">        <span class="variable constant_">JSVM_LOAD_VAR</span>, <span class="string">&#x27;b&#x27;</span>,           <span class="comment">// 加载变量b到栈</span></span><br><span class="line">        <span class="variable constant_">JSVM_ADD</span>,                     <span class="comment">// 栈顶两个值相加</span></span><br><span class="line">        <span class="variable constant_">JSVM_RETURN</span>                   <span class="comment">// 返回结果</span></span><br><span class="line">    ];</span><br><span class="line">    </span><br><span class="line">    vm.<span class="title function_">setBytecode</span>(bytecode);</span><br><span class="line">    <span class="keyword">return</span> vm.<span class="title function_">execute</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="7-OLLVM工作机制和原理"><a href="#7-OLLVM工作机制和原理" class="headerlink" title="7. OLLVM工作机制和原理"></a>7. OLLVM工作机制和原理</h3><h4 id="a-控制流平坦化原理-1"><a href="#a-控制流平坦化原理-1" class="headerlink" title="a. 控制流平坦化原理"></a>a. 控制流平坦化原理</h4><pre class="mermaid">flowchart TD
+    A[原始控制流] --> B[复杂分支结构]
+    B --> C[条件判断]
+    C --> D[多个执行路径]
+    
+    E[平坦化后] --> F[Switch-Case结构]
+    F --> G[状态变量控制]
+    G --> H[统一执行流程]
+    
+    I[状态机] --> J[状态0: 初始化]
+    I --> K[状态1: 处理A]
+    I --> L[状态2: 处理B]
+    I --> M[状态3: 结束]</pre>
+
+<h4 id="b-OLLVM伪代码示例"><a href="#b-OLLVM伪代码示例" class="headerlink" title="b. OLLVM伪代码示例"></a>b. OLLVM伪代码示例</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// OLLVM控制流平坦化伪代码</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">OLLVMFlattener</span> &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="type">int</span> state;              <span class="comment">// 状态变量</span></span><br><span class="line">    <span class="type">int</span>* stateTable;        <span class="comment">// 状态跳转表</span></span><br><span class="line">    <span class="type">bool</span>* conditionFlags;   <span class="comment">// 条件标志</span></span><br><span class="line">    </span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 原始函数</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">originalFunction</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (x &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (y &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> x + y;</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">return</span> x - y;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 平坦化后的函数</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">flattenedFunction</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> </span>&#123;</span><br><span class="line">        state = <span class="number">0</span>;  <span class="comment">// 初始状态</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="keyword">switch</span> (state) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="number">0</span>:  <span class="comment">// 初始化状态</span></span><br><span class="line">                    state = <span class="number">1</span>;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="number">1</span>:  <span class="comment">// 检查 x &gt; 0</span></span><br><span class="line">                    <span class="keyword">if</span> (x &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                        state = <span class="number">2</span>;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        state = <span class="number">4</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="number">2</span>:  <span class="comment">// 检查 y &gt; 0</span></span><br><span class="line">                    <span class="keyword">if</span> (y &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                        state = <span class="number">3</span>;</span><br><span class="line">                    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        state = <span class="number">5</span>;</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="number">3</span>:  <span class="comment">// 返回 x + y</span></span><br><span class="line">                    <span class="keyword">return</span> x + y;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="number">4</span>:  <span class="comment">// 返回 0</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="number">5</span>:  <span class="comment">// 返回 x - y</span></span><br><span class="line">                    <span class="keyword">return</span> x - y;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 指令替换示例</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">instructionSubstitution</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 原始指令：return a + b;</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 替换后的复杂指令</span></span><br><span class="line">        <span class="type">int</span> temp1 = a;</span><br><span class="line">        <span class="type">int</span> temp2 = b;</span><br><span class="line">        <span class="type">int</span> temp3 = temp1 ^ temp2;</span><br><span class="line">        <span class="type">int</span> temp4 = temp1 &amp; temp2;</span><br><span class="line">        <span class="type">int</span> temp5 = temp4 &lt;&lt; <span class="number">1</span>;</span><br><span class="line">        <span class="type">int</span> result = temp3 ^ temp5;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> result;  <span class="comment">// 等价于 a + b</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 虚假控制流示例</span></span><br><span class="line">    <span class="function"><span class="type">int</span> <span class="title">bogusControlFlow</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">        <span class="type">int</span> result = <span class="number">0</span>;</span><br><span class="line">        <span class="type">int</span> dummy = <span class="number">0</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 虚假分支1</span></span><br><span class="line">        <span class="keyword">if</span> (dummy == <span class="number">0</span>) &#123;</span><br><span class="line">            dummy = <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            dummy = <span class="number">0</span>;  <span class="comment">// 永远不会执行</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 真实逻辑</span></span><br><span class="line">        <span class="keyword">if</span> (x &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            result = x * <span class="number">2</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            result = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 虚假分支2</span></span><br><span class="line">        <span class="keyword">if</span> (dummy == <span class="number">1</span>) &#123;</span><br><span class="line">            dummy = <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            dummy = <span class="number">1</span>;  <span class="comment">// 永远不会执行</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="c-OLLVM混淆示例"><a href="#c-OLLVM混淆示例" class="headerlink" title="c. OLLVM混淆示例"></a>c. OLLVM混淆示例</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原始代码</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">checkPassword</span><span class="params">(<span class="type">char</span>* input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strlen</span>(input) &lt; <span class="number">8</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strcmp</span>(input, <span class="string">&quot;password123&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// OLLVM混淆后（伪代码）</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">obfuscated_checkPassword</span><span class="params">(<span class="type">char</span>* input)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> state = <span class="number">0</span>;</span><br><span class="line">    <span class="type">int</span> result = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">        <span class="keyword">switch</span> (state) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">0</span>:  <span class="comment">// 初始化</span></span><br><span class="line">                state = <span class="number">1</span>;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">                </span><br><span class="line">            <span class="keyword">case</span> <span class="number">1</span>:  <span class="comment">// 检查长度</span></span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">strlen</span>(input) &lt; <span class="number">8</span>) &#123;</span><br><span class="line">                    state = <span class="number">4</span>;  <span class="comment">// 失败</span></span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    state = <span class="number">2</span>;  <span class="comment">// 继续检查</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">                </span><br><span class="line">            <span class="keyword">case</span> <span class="number">2</span>:  <span class="comment">// 检查密码</span></span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">strcmp</span>(input, <span class="string">&quot;password123&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                    state = <span class="number">3</span>;  <span class="comment">// 成功</span></span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    state = <span class="number">4</span>;  <span class="comment">// 失败</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">                </span><br><span class="line">            <span class="keyword">case</span> <span class="number">3</span>:  <span class="comment">// 返回成功</span></span><br><span class="line">                <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">                </span><br><span class="line">            <span class="keyword">case</span> <span class="number">4</span>:  <span class="comment">// 返回失败</span></span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 编译命令</span></span><br><span class="line">clang -mllvm -fla -mllvm -sub -mllvm -bcf source.c -o obfuscated</span><br><span class="line"></span><br><span class="line"><span class="comment"># 参数说明</span></span><br><span class="line"><span class="comment"># -fla: 控制流平坦化</span></span><br><span class="line"><span class="comment"># -sub: 指令替换</span></span><br><span class="line"><span class="comment"># -bcf: 虚假控制流</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="b-混淆前后对比"><a href="#b-混淆前后对比" class="headerlink" title="b. 混淆前后对比"></a>b. 混淆前后对比</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原始代码</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">checkPassword</span><span class="params">(<span class="type">char</span>* input)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strlen</span>(input) &lt; <span class="number">8</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strcmp</span>(input, <span class="string">&quot;password123&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// OLLVM混淆后（伪代码）</span></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">checkPassword</span><span class="params">(<span class="type">char</span>* input)</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> state = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">switch</span> (state) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">strlen</span>(input) &lt; <span class="number">8</span>) &#123;</span><br><span class="line">                    state = <span class="number">3</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    state = <span class="number">1</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">1</span>:</span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">strcmp</span>(input, <span class="string">&quot;password123&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                    state = <span class="number">2</span>;</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    state = <span class="number">3</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">2</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="number">3</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、WASM技术原理"><a href="#四、WASM技术原理" class="headerlink" title="四、WASM技术原理"></a>四、WASM技术原理</h2><h3 id="1-WebAssembly架构"><a href="#1-WebAssembly架构" class="headerlink" title="1. WebAssembly架构"></a>1. WebAssembly架构</h3><p>WASM采用栈式虚拟机架构，提供高效的二进制指令格式。</p>
+<h4 id="a-WASM执行架构"><a href="#a-WASM执行架构" class="headerlink" title="a. WASM执行架构"></a>a. WASM执行架构</h4><pre class="mermaid">graph TB
+    A[WASM模块] --> B[二进制格式]
+    B --> C[验证器]
+    C --> D[编译器]
+    D --> E[机器码]
+    
+    F[执行环境] --> G[JavaScript引擎]
+    F --> H[WASM运行时]
+    F --> I[系统API]
+    
+    G --> J[V8引擎]
+    G --> K[SpiderMonkey]
+    G --> L[JavaScriptCore]
+    
+    H --> M[线性内存]
+    H --> N[函数表]
+    H --> O[全局变量]</pre>
+
+<p><strong>WASM组件</strong>：</p>
+<ul>
+<li><strong>模块系统</strong>：独立的编译单元</li>
+<li><strong>线性内存</strong>：连续的内存空间</li>
+<li><strong>函数表</strong>：间接函数调用</li>
+<li><strong>导入导出</strong>：与宿主环境交互</li>
+</ul>
+<h3 id="2-安全特性"><a href="#2-安全特性" class="headerlink" title="2. 安全特性"></a>2. 安全特性</h3><h4 id="a-WASM安全模型"><a href="#a-WASM安全模型" class="headerlink" title="a. WASM安全模型"></a>a. WASM安全模型</h4><pre class="mermaid">flowchart TD
+    A[WASM安全模型] --> B[内存安全]
+    A --> C[控制流完整性]
+    A --> D[沙箱隔离]
+    
+    B --> E[边界检查]
+    B --> F[类型安全]
+    B --> G[空指针检查]
+    
+    C --> H[间接调用验证]
+    C --> I[返回地址保护]
+    C --> J[栈溢出保护]
+    
+    D --> K[系统调用限制]
+    D --> L[文件访问控制]
+    D --> M[网络访问限制]</pre>
+
+<p><strong>安全特点</strong>：</p>
+<ul>
+<li><strong>内存安全</strong>：防止缓冲区溢出</li>
+<li><strong>控制流完整性</strong>：防止ROP攻击</li>
+<li><strong>沙箱隔离</strong>：限制系统访问</li>
+<li><strong>类型安全</strong>：严格的类型检查</li>
+</ul>
+<h3 id="8-WASM工作机制和原理"><a href="#8-WASM工作机制和原理" class="headerlink" title="8. WASM工作机制和原理"></a>8. WASM工作机制和原理</h3><h4 id="a-WASM执行架构-1"><a href="#a-WASM执行架构-1" class="headerlink" title="a. WASM执行架构"></a>a. WASM执行架构</h4><pre class="mermaid">graph TB
+    A[WASM模块] --> B[二进制格式]
+    B --> C[验证器]
+    C --> D[编译器]
+    D --> E[机器码]
+    
+    F[执行环境] --> G[JavaScript引擎]
+    F --> H[WASM运行时]
+    F --> I[系统API]
+    
+    G --> J[V8引擎]
+    G --> K[SpiderMonkey]
+    G --> L[JavaScriptCore]
+    
+    H --> M[线性内存]
+    H --> N[函数表]
+    H --> O[全局变量]</pre>
+
+<h4 id="b-WASM伪代码示例"><a href="#b-WASM伪代码示例" class="headerlink" title="b. WASM伪代码示例"></a>b. WASM伪代码示例</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// WASM虚拟机核心伪代码</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">WASMVirtualMachine</span> &#123;</span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">memory</span> = <span class="keyword">new</span> <span class="title class_">ArrayBuffer</span>(<span class="number">1024</span> * <span class="number">1024</span>);  <span class="comment">// 1MB线性内存</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">stack</span> = [];                              <span class="comment">// 执行栈</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">globals</span> = &#123;&#125;;                            <span class="comment">// 全局变量</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">functions</span> = [];                          <span class="comment">// 函数表</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">pc</span> = <span class="number">0</span>;                                  <span class="comment">// 程序计数器</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 加载WASM模块</span></span><br><span class="line">    <span class="title function_">loadModule</span>(<span class="params">wasmBytes</span>) &#123;</span><br><span class="line">        <span class="comment">// 解析WASM二进制格式</span></span><br><span class="line">        <span class="keyword">const</span> <span class="variable language_">module</span> = <span class="variable language_">this</span>.<span class="title function_">parseWASM</span>(wasmBytes);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 验证模块</span></span><br><span class="line">        <span class="keyword">if</span> (!<span class="variable language_">this</span>.<span class="title function_">validateModule</span>(<span class="variable language_">module</span>)) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Invalid WASM module&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 初始化模块</span></span><br><span class="line">        <span class="variable language_">this</span>.<span class="title function_">initializeModule</span>(<span class="variable language_">module</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 执行WASM指令</span></span><br><span class="line">    <span class="title function_">execute</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="variable language_">this</span>.<span class="property">pc</span> &lt; <span class="variable language_">this</span>.<span class="property">instructions</span>.<span class="property">length</span>) &#123;</span><br><span class="line">            <span class="keyword">const</span> instruction = <span class="variable language_">this</span>.<span class="property">instructions</span>[<span class="variable language_">this</span>.<span class="property">pc</span>++];</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">switch</span> (instruction.<span class="property">opcode</span>) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;i32.const&#x27;</span>:</span><br><span class="line">                    <span class="comment">// 加载32位整数常量</span></span><br><span class="line">                    <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">push</span>(instruction.<span class="property">value</span>);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;i32.add&#x27;</span>:</span><br><span class="line">                    <span class="comment">// 32位整数相加</span></span><br><span class="line">                    <span class="keyword">const</span> b = <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">pop</span>();</span><br><span class="line">                    <span class="keyword">const</span> a = <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">pop</span>();</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">push</span>(a + b);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;local.get&#x27;</span>:</span><br><span class="line">                    <span class="comment">// 获取局部变量</span></span><br><span class="line">                    <span class="keyword">const</span> localIndex = instruction.<span class="property">index</span>;</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">push</span>(<span class="variable language_">this</span>.<span class="property">locals</span>[localIndex]);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;local.set&#x27;</span>:</span><br><span class="line">                    <span class="comment">// 设置局部变量</span></span><br><span class="line">                    <span class="keyword">const</span> value = <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">pop</span>();</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="property">locals</span>[instruction.<span class="property">index</span>] = value;</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;call&#x27;</span>:</span><br><span class="line">                    <span class="comment">// 调用函数</span></span><br><span class="line">                    <span class="keyword">const</span> funcIndex = instruction.<span class="property">index</span>;</span><br><span class="line">                    <span class="variable language_">this</span>.<span class="title function_">callFunction</span>(funcIndex);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                    </span><br><span class="line">                <span class="keyword">case</span> <span class="string">&#x27;return&#x27;</span>:</span><br><span class="line">                    <span class="comment">// 返回</span></span><br><span class="line">                    <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">pop</span>();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 调用函数</span></span><br><span class="line">    <span class="title function_">callFunction</span>(<span class="params">index</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> func = <span class="variable language_">this</span>.<span class="property">functions</span>[index];</span><br><span class="line">        <span class="keyword">const</span> args = [];</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 获取参数</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; func.<span class="property">paramCount</span>; i++) &#123;</span><br><span class="line">            args.<span class="title function_">unshift</span>(<span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">pop</span>());</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 执行函数</span></span><br><span class="line">        <span class="keyword">const</span> result = func.<span class="title function_">execute</span>(args);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 返回结果</span></span><br><span class="line">        <span class="keyword">if</span> (result !== <span class="literal">undefined</span>) &#123;</span><br><span class="line">            <span class="variable language_">this</span>.<span class="property">stack</span>.<span class="title function_">push</span>(result);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 内存操作</span></span><br><span class="line">    <span class="title function_">loadMemory</span>(<span class="params">offset, type</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> view = <span class="keyword">new</span> <span class="title class_">DataView</span>(<span class="variable language_">this</span>.<span class="property">memory</span>);</span><br><span class="line">        <span class="keyword">switch</span> (type) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&#x27;i32&#x27;</span>:</span><br><span class="line">                <span class="keyword">return</span> view.<span class="title function_">getInt32</span>(offset, <span class="literal">true</span>);</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&#x27;f32&#x27;</span>:</span><br><span class="line">                <span class="keyword">return</span> view.<span class="title function_">getFloat32</span>(offset, <span class="literal">true</span>);</span><br><span class="line">            <span class="attr">default</span>:</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Unsupported type&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="title function_">storeMemory</span>(<span class="params">offset, value, type</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> view = <span class="keyword">new</span> <span class="title class_">DataView</span>(<span class="variable language_">this</span>.<span class="property">memory</span>);</span><br><span class="line">        <span class="keyword">switch</span> (type) &#123;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&#x27;i32&#x27;</span>:</span><br><span class="line">                view.<span class="title function_">setInt32</span>(offset, value, <span class="literal">true</span>);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="keyword">case</span> <span class="string">&#x27;f32&#x27;</span>:</span><br><span class="line">                view.<span class="title function_">setFloat32</span>(offset, value, <span class="literal">true</span>);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            <span class="attr">default</span>:</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&#x27;Unsupported type&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="c-WASM保护示例"><a href="#c-WASM保护示例" class="headerlink" title="c. WASM保护示例"></a>c. WASM保护示例</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原始JavaScript代码</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">fibonacci</span>(<span class="params">n</span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (n &lt;= <span class="number">1</span>) <span class="keyword">return</span> n;</span><br><span class="line">    <span class="keyword">return</span> <span class="title function_">fibonacci</span>(n - <span class="number">1</span>) + <span class="title function_">fibonacci</span>(n - <span class="number">2</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// WASM保护后的伪代码</span></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">protected_fibonacci</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> vm = <span class="keyword">new</span> <span class="title class_">WASMVirtualMachine</span>();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// WASM字节码（伪代码）</span></span><br><span class="line">    <span class="keyword">const</span> wasmBytes = [</span><br><span class="line">        <span class="comment">// 函数定义</span></span><br><span class="line">        &#123; <span class="attr">type</span>: <span class="string">&#x27;func&#x27;</span>, <span class="attr">params</span>: [<span class="string">&#x27;i32&#x27;</span>], <span class="attr">returns</span>: [<span class="string">&#x27;i32&#x27;</span>] &#125;,</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 指令序列</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;local.get&#x27;</span>, <span class="attr">index</span>: <span class="number">0</span> &#125;,      <span class="comment">// 获取参数n</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;i32.const&#x27;</span>, <span class="attr">value</span>: <span class="number">1</span> &#125;,      <span class="comment">// 加载常量1</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;i32.le_s&#x27;</span> &#125;,                 <span class="comment">// n &lt;= 1</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;if&#x27;</span>, <span class="attr">result</span>: <span class="string">&#x27;i32&#x27;</span> &#125;,        <span class="comment">// 条件判断</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;local.get&#x27;</span>, <span class="attr">index</span>: <span class="number">0</span> &#125;,      <span class="comment">// 获取参数n</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;return&#x27;</span> &#125;,                   <span class="comment">// 返回n</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;else&#x27;</span> &#125;,                     <span class="comment">// else分支</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;local.get&#x27;</span>, <span class="attr">index</span>: <span class="number">0</span> &#125;,      <span class="comment">// 获取参数n</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;i32.const&#x27;</span>, <span class="attr">value</span>: <span class="number">1</span> &#125;,      <span class="comment">// 加载常量1</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;i32.sub&#x27;</span> &#125;,                  <span class="comment">// n - 1</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;call&#x27;</span>, <span class="attr">index</span>: <span class="number">0</span> &#125;,           <span class="comment">// 递归调用</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;local.get&#x27;</span>, <span class="attr">index</span>: <span class="number">0</span> &#125;,      <span class="comment">// 获取参数n</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;i32.const&#x27;</span>, <span class="attr">value</span>: <span class="number">2</span> &#125;,      <span class="comment">// 加载常量2</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;i32.sub&#x27;</span> &#125;,                  <span class="comment">// n - 2</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;call&#x27;</span>, <span class="attr">index</span>: <span class="number">0</span> &#125;,           <span class="comment">// 递归调用</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;i32.add&#x27;</span> &#125;,                  <span class="comment">// 相加</span></span><br><span class="line">        &#123; <span class="attr">opcode</span>: <span class="string">&#x27;end&#x27;</span> &#125;                       <span class="comment">// 结束if</span></span><br><span class="line">    ];</span><br><span class="line">    </span><br><span class="line">    vm.<span class="title function_">loadModule</span>(wasmBytes);</span><br><span class="line">    <span class="keyword">return</span> vm.<span class="title function_">execute</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// C++源代码</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;emscripten.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> &#123;</span><br><span class="line">    <span class="function">EMSCRIPTEN_KEEPALIVE</span></span><br><span class="line"><span class="function">    <span class="type">int</span> <span class="title">fibonacci</span><span class="params">(<span class="type">int</span> n)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (n &lt;= <span class="number">1</span>) <span class="keyword">return</span> n;</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">fibonacci</span>(n - <span class="number">1</span>) + <span class="built_in">fibonacci</span>(n - <span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 编译命令</span></span><br><span class="line">emcc fibonacci.cpp -o fibonacci.wasm -s EXPORTED_FUNCTIONS=<span class="string">&quot;[&#x27;_fibonacci&#x27;]&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="b-JavaScript调用WASM"><a href="#b-JavaScript调用WASM" class="headerlink" title="b. JavaScript调用WASM"></a>b. JavaScript调用WASM</h4><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 加载WASM模块</span></span><br><span class="line"><span class="title class_">WebAssembly</span>.<span class="title function_">instantiateStreaming</span>(<span class="title function_">fetch</span>(<span class="string">&#x27;fibonacci.wasm&#x27;</span>))</span><br><span class="line">    .<span class="title function_">then</span>(<span class="function"><span class="params">obj</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> fibonacci = obj.<span class="property">instance</span>.<span class="property">exports</span>.<span class="property">fibonacci</span>;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title function_">fibonacci</span>(<span class="number">10</span>)); <span class="comment">// 输出: 55</span></span><br><span class="line">    &#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="五、VMP与JSVMP对比分析"><a href="#五、VMP与JSVMP对比分析" class="headerlink" title="五、VMP与JSVMP对比分析"></a>五、VMP与JSVMP对比分析</h2><h3 id="1-技术对比表"><a href="#1-技术对比表" class="headerlink" title="1. 技术对比表"></a>1. 技术对比表</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>VMP</th>
+<th>JSVMP</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>保护对象</td>
+<td>原生代码(x86&#x2F;x64)</td>
+<td>JavaScript代码</td>
+</tr>
+<tr>
+<td>虚拟机架构</td>
+<td>自定义虚拟机</td>
+<td>JavaScript虚拟机</td>
+</tr>
+<tr>
+<td>保护强度</td>
+<td>极高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>性能开销</td>
+<td>高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td>兼容性</td>
+<td>中</td>
+<td>高</td>
+</tr>
+<tr>
+<td>学习成本</td>
+<td>高</td>
+<td>中</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>桌面应用</td>
+<td>Web应用</td>
+</tr>
+<tr>
+<td>逆向难度</td>
+<td>极高</td>
+<td>高</td>
+</tr>
+</tbody></table>
+<h3 id="2-选择建议"><a href="#2-选择建议" class="headerlink" title="2. 选择建议"></a>2. 选择建议</h3><h4 id="a-VMP适用场景"><a href="#a-VMP适用场景" class="headerlink" title="a. VMP适用场景"></a>a. VMP适用场景</h4><ul>
+<li><strong>桌面应用保护</strong>：需要高强度保护的桌面软件</li>
+<li><strong>游戏保护</strong>：需要防止外挂的游戏应用</li>
+<li><strong>商业软件</strong>：需要保护核心算法的商业软件</li>
+<li><strong>金融软件</strong>：需要高安全性的金融应用</li>
+</ul>
+<h4 id="b-JSVMP适用场景"><a href="#b-JSVMP适用场景" class="headerlink" title="b. JSVMP适用场景"></a>b. JSVMP适用场景</h4><ul>
+<li><strong>Web应用保护</strong>：需要保护前端逻辑的Web应用</li>
+<li><strong>在线游戏</strong>：需要防止外挂的在线游戏</li>
+<li><strong>金融Web应用</strong>：需要保护交易逻辑的金融应用</li>
+<li><strong>API保护</strong>：需要保护接口逻辑的Web服务</li>
+</ul>
+<h2 id="六、技术对比与选择"><a href="#六、技术对比与选择" class="headerlink" title="六、技术对比与选择"></a>六、技术对比与选择</h2><h3 id="1-技术对比表-1"><a href="#1-技术对比表-1" class="headerlink" title="1. 技术对比表"></a>1. 技术对比表</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>VMP</th>
+<th>JSVMP</th>
+<th>OLLVM</th>
+<th>WASM</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>保护强度</td>
+<td>极高</td>
+<td>高</td>
+<td>中</td>
+<td>中</td>
+</tr>
+<tr>
+<td>性能开销</td>
+<td>高</td>
+<td>中</td>
+<td>低</td>
+<td>低</td>
+</tr>
+<tr>
+<td>兼容性</td>
+<td>中</td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+</tr>
+<tr>
+<td>学习成本</td>
+<td>高</td>
+<td>中</td>
+<td>中</td>
+<td>低</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>桌面应用</td>
+<td>Web应用</td>
+<td>开源项目</td>
+<td>Web应用</td>
+</tr>
+<tr>
+<td>逆向难度</td>
+<td>极高</td>
+<td>高</td>
+<td>高</td>
+<td>中</td>
+</tr>
+</tbody></table>
+<h3 id="2-选择建议-1"><a href="#2-选择建议-1" class="headerlink" title="2. 选择建议"></a>2. 选择建议</h3><h4 id="a-VMP适用场景-1"><a href="#a-VMP适用场景-1" class="headerlink" title="a. VMP适用场景"></a>a. VMP适用场景</h4><ul>
+<li><strong>桌面应用保护</strong>：需要高强度保护的桌面软件</li>
+<li><strong>游戏保护</strong>：需要防止外挂的游戏应用</li>
+<li><strong>商业软件</strong>：需要保护核心算法的商业软件</li>
+<li><strong>金融软件</strong>：需要高安全性的金融应用</li>
+</ul>
+<h4 id="b-JSVMP适用场景-1"><a href="#b-JSVMP适用场景-1" class="headerlink" title="b. JSVMP适用场景"></a>b. JSVMP适用场景</h4><ul>
+<li><strong>Web应用保护</strong>：需要保护前端逻辑的Web应用</li>
+<li><strong>在线游戏</strong>：需要防止外挂的在线游戏</li>
+<li><strong>金融Web应用</strong>：需要保护交易逻辑的金融应用</li>
+<li><strong>API保护</strong>：需要保护接口逻辑的Web服务</li>
+</ul>
+<h4 id="c-OLLVM适用场景"><a href="#c-OLLVM适用场景" class="headerlink" title="c. OLLVM适用场景"></a>c. OLLVM适用场景</h4><ul>
+<li><strong>开源项目</strong>：需要免费混淆方案</li>
+<li><strong>性能敏感</strong>：对性能要求较高的应用</li>
+<li><strong>跨平台支持</strong>：需要支持多种平台</li>
+</ul>
+<h4 id="d-WASM适用场景"><a href="#d-WASM适用场景" class="headerlink" title="d. WASM适用场景"></a>d. WASM适用场景</h4><ul>
+<li><strong>Web应用</strong>：需要在浏览器中运行高性能代码</li>
+<li><strong>跨平台部署</strong>：需要统一的部署方案</li>
+<li><strong>安全要求</strong>：需要沙箱执行环境</li>
+</ul>
+<h2 id="七、结语"><a href="#七、结语" class="headerlink" title="七、结语"></a>七、结语</h2><p><strong>核心价值</strong>：<br>VMP、JSVMP、OLLVM、WASM代表了现代代码保护技术的四个重要方向：原生代码虚拟机保护、JavaScript虚拟机保护、编译时混淆和字节码技术。每种技术都有其独特的优势和应用场景，选择合适的保护方案需要根据具体需求进行权衡。</p>
+<p><strong>同类工具推荐</strong>：<br>在代码保护领域，还有Themida（商业保护）、UPX（压缩保护）、ASProtect（加密保护）等工具。VMP在原生代码虚拟机保护方面具有独特优势，JSVMP在JavaScript保护领域具有重要价值，OLLVM在开源混淆领域占据主导地位，WASM在Web安全方面具有重要价值。</p>
+<p><strong>学习建议</strong>：<br>掌握这些技术需要深入理解底层原理，建议从简单的混淆技术开始，逐步学习更复杂的保护机制。同时要关注技术发展趋势，及时了解新的保护和解密技术。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章推荐</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\12\article9_android_root_tools_v2\" rel="bookmark">Android Root技术解析：从传统到现代的三种主流方案</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\15\article11_frida_hook\" rel="bookmark">Frida Hook技术入门：从零开始掌握动态分析神器</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\16\article12_objection_usage\" rel="bookmark">Objection使用指南：基于Frida的移动安全测试神器</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\18\article13_adb_commands\" rel="bookmark">ADB命令实战指南：Android调试桥的实用技巧</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div>持续输出技术分享，您的支持将鼓励我继续创作!</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wxpay.jpg" alt="果子 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="果子 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>果子
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://ihandmine.github.io/2025/09/29/article17_vmp_ollvm_wasm_guide/" title="VMP、JSVMP、OLLVM、WASM技术解析：从虚拟机保护到字节码混淆">https://ihandmine.github.io/2025/09/29/article17_vmp_ollvm_wasm_guide/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags" id="post-tags">
+              <a href="/tags/VMP/" rel="tag"><i class="fa fa-tag"></i> VMP</a>
+              <a href="/tags/JSVMP/" rel="tag"><i class="fa fa-tag"></i> JSVMP</a>
+              <a href="/tags/OLLVM/" rel="tag"><i class="fa fa-tag"></i> OLLVM</a>
+              <a href="/tags/WASM/" rel="tag"><i class="fa fa-tag"></i> WASM</a>
+              <a href="/tags/%E6%8A%80%E6%9C%AF%E8%A7%A3%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 技术解析</a>
+              <a href="/tags/%E8%99%9A%E6%8B%9F%E6%9C%BA%E4%BF%9D%E6%8A%A4/" rel="tag"><i class="fa fa-tag"></i> 虚拟机保护</a>
+              <a href="/tags/%E5%AD%97%E8%8A%82%E7%A0%81%E6%B7%B7%E6%B7%86/" rel="tag"><i class="fa fa-tag"></i> 字节码混淆</a>
+          </div>
+
+        <script type="text/javascript">
+        var tagsall=document.getElementsByClassName("post-tags")
+        for (var i = tagsall.length - 1; i >= 0; i--){
+            var tags=tagsall[i].getElementsByTagName("a");
+            for (var j = tags.length - 1; j >= 0; j--) {
+                var r=Math.floor(Math.random()*75+130);
+                var g=Math.floor(Math.random()*75+100);
+                var b=Math.floor(Math.random()*75+80);
+                tags[j].style.background = "rgb("+r+","+g+","+b+")";
+            }
+        }                        
+        </script>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/09/26/article16_unidbg_introduction/" rel="prev" title="Unidbg入门指南：Android Native代码模拟利器">
+      <i class="fa fa-chevron-left"></i> Unidbg入门指南：Android Native代码模拟利器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/10/15/article18_frida_detection_bypass/" rel="next" title="Frida特征检测及对应的绕过技术解析">
+      Frida特征检测及对应的绕过技术解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%8A%80%E6%9C%AF%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">一、技术概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-VMP%EF%BC%88VMProtect%EF%BC%89"><span class="nav-number">1.1.</span> <span class="nav-text">1. VMP（VMProtect）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-JSVMP%EF%BC%88JavaScript-Virtual-Machine-Protection%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">2. JSVMP（JavaScript Virtual Machine Protection）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-OLLVM%EF%BC%88Obfuscator-LLVM%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">3. OLLVM（Obfuscator-LLVM）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-WASM%EF%BC%88WebAssembly%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">4. WASM（WebAssembly）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94%E5%9B%BE"><span class="nav-number">1.5.</span> <span class="nav-text">5. 技术对比图</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81VMP%E4%B8%8EJSVMP%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">二、VMP与JSVMP技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-VMP%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">1. VMP虚拟机架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-VMP%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="nav-number">2.1.1.</span> <span class="nav-text">a. VMP虚拟机架构图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-JSVMP%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%9E%B6%E6%9E%84"><span class="nav-number">2.2.</span> <span class="nav-text">2. JSVMP虚拟机架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-JSVMP%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="nav-number">2.2.1.</span> <span class="nav-text">a. JSVMP虚拟机架构图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-VMP%E4%BF%9D%E6%8A%A4%E6%9C%BA%E5%88%B6"><span class="nav-number">2.3.</span> <span class="nav-text">3. VMP保护机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-%E4%BB%A3%E7%A0%81%E5%8A%A0%E5%AF%86%E6%B5%81%E7%A8%8B"><span class="nav-number">2.3.1.</span> <span class="nav-text">a. 代码加密流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-JSVMP%E4%BF%9D%E6%8A%A4%E6%9C%BA%E5%88%B6"><span class="nav-number">2.4.</span> <span class="nav-text">4. JSVMP保护机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-JSVMP%E4%BF%9D%E6%8A%A4%E6%B5%81%E7%A8%8B"><span class="nav-number">2.4.1.</span> <span class="nav-text">a. JSVMP保护流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-VMP%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6%E5%92%8C%E5%8E%9F%E7%90%86"><span class="nav-number">2.5.</span> <span class="nav-text">5. VMP工作机制和原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-VMP%E4%BC%AA%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-number">2.5.1.</span> <span class="nav-text">a. VMP伪代码示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-VMP%E4%BF%9D%E6%8A%A4%E7%A4%BA%E4%BE%8B"><span class="nav-number">2.5.2.</span> <span class="nav-text">b. VMP保护示例</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81OLLVM%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">三、OLLVM技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%BC%96%E8%AF%91%E6%97%B6%E6%B7%B7%E6%B7%86"><span class="nav-number">3.1.</span> <span class="nav-text">1. 编译时混淆</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-OLLVM%E6%B7%B7%E6%B7%86%E6%B5%81%E7%A8%8B"><span class="nav-number">3.1.1.</span> <span class="nav-text">a. OLLVM混淆流程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E6%8E%A7%E5%88%B6%E6%B5%81%E5%B9%B3%E5%9D%A6%E5%8C%96"><span class="nav-number">3.2.</span> <span class="nav-text">2. 控制流平坦化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-%E6%8E%A7%E5%88%B6%E6%B5%81%E5%B9%B3%E5%9D%A6%E5%8C%96%E5%8E%9F%E7%90%86"><span class="nav-number">3.2.1.</span> <span class="nav-text">a. 控制流平坦化原理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-JSVMP%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6%E5%92%8C%E5%8E%9F%E7%90%86"><span class="nav-number">3.3.</span> <span class="nav-text">6. JSVMP工作机制和原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-JSVMP%E4%BF%9D%E6%8A%A4%E6%B5%81%E7%A8%8B-1"><span class="nav-number">3.3.1.</span> <span class="nav-text">a. JSVMP保护流程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-JSVMP%E4%BC%AA%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.3.2.</span> <span class="nav-text">b. JSVMP伪代码示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#c-JSVMP%E4%BF%9D%E6%8A%A4%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.3.3.</span> <span class="nav-text">c. JSVMP保护示例</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-OLLVM%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6%E5%92%8C%E5%8E%9F%E7%90%86"><span class="nav-number">3.4.</span> <span class="nav-text">7. OLLVM工作机制和原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-%E6%8E%A7%E5%88%B6%E6%B5%81%E5%B9%B3%E5%9D%A6%E5%8C%96%E5%8E%9F%E7%90%86-1"><span class="nav-number">3.4.1.</span> <span class="nav-text">a. 控制流平坦化原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-OLLVM%E4%BC%AA%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.4.2.</span> <span class="nav-text">b. OLLVM伪代码示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#c-OLLVM%E6%B7%B7%E6%B7%86%E7%A4%BA%E4%BE%8B"><span class="nav-number">3.4.3.</span> <span class="nav-text">c. OLLVM混淆示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-%E6%B7%B7%E6%B7%86%E5%89%8D%E5%90%8E%E5%AF%B9%E6%AF%94"><span class="nav-number">3.4.4.</span> <span class="nav-text">b. 混淆前后对比</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81WASM%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">四、WASM技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-WebAssembly%E6%9E%B6%E6%9E%84"><span class="nav-number">4.1.</span> <span class="nav-text">1. WebAssembly架构</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-WASM%E6%89%A7%E8%A1%8C%E6%9E%B6%E6%9E%84"><span class="nav-number">4.1.1.</span> <span class="nav-text">a. WASM执行架构</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%89%E5%85%A8%E7%89%B9%E6%80%A7"><span class="nav-number">4.2.</span> <span class="nav-text">2. 安全特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-WASM%E5%AE%89%E5%85%A8%E6%A8%A1%E5%9E%8B"><span class="nav-number">4.2.1.</span> <span class="nav-text">a. WASM安全模型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-WASM%E5%B7%A5%E4%BD%9C%E6%9C%BA%E5%88%B6%E5%92%8C%E5%8E%9F%E7%90%86"><span class="nav-number">4.3.</span> <span class="nav-text">8. WASM工作机制和原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-WASM%E6%89%A7%E8%A1%8C%E6%9E%B6%E6%9E%84-1"><span class="nav-number">4.3.1.</span> <span class="nav-text">a. WASM执行架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-WASM%E4%BC%AA%E4%BB%A3%E7%A0%81%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.3.2.</span> <span class="nav-text">b. WASM伪代码示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#c-WASM%E4%BF%9D%E6%8A%A4%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.3.3.</span> <span class="nav-text">c. WASM保护示例</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-JavaScript%E8%B0%83%E7%94%A8WASM"><span class="nav-number">4.3.4.</span> <span class="nav-text">b. JavaScript调用WASM</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81VMP%E4%B8%8EJSVMP%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90"><span class="nav-number">5.</span> <span class="nav-text">五、VMP与JSVMP对比分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94%E8%A1%A8"><span class="nav-number">5.1.</span> <span class="nav-text">1. 技术对比表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%80%89%E6%8B%A9%E5%BB%BA%E8%AE%AE"><span class="nav-number">5.2.</span> <span class="nav-text">2. 选择建议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-VMP%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">5.2.1.</span> <span class="nav-text">a. VMP适用场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-JSVMP%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">5.2.2.</span> <span class="nav-text">b. JSVMP适用场景</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94%E4%B8%8E%E9%80%89%E6%8B%A9"><span class="nav-number">6.</span> <span class="nav-text">六、技术对比与选择</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94%E8%A1%A8-1"><span class="nav-number">6.1.</span> <span class="nav-text">1. 技术对比表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%80%89%E6%8B%A9%E5%BB%BA%E8%AE%AE-1"><span class="nav-number">6.2.</span> <span class="nav-text">2. 选择建议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#a-VMP%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-1"><span class="nav-number">6.2.1.</span> <span class="nav-text">a. VMP适用场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#b-JSVMP%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF-1"><span class="nav-number">6.2.2.</span> <span class="nav-text">b. JSVMP适用场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#c-OLLVM%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">6.2.3.</span> <span class="nav-text">c. OLLVM适用场景</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#d-WASM%E9%80%82%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="nav-number">6.2.4.</span> <span class="nav-text">d. WASM适用场景</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%83%E3%80%81%E7%BB%93%E8%AF%AD"><span class="nav-number">7.</span> <span class="nav-text">七、结语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="果子"
+      src="/images/gzhavatar.jpg">
+  <p class="site-author-name" itemprop="name">果子</p>
+  <div class="site-description" itemprop="description">简单正直</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ihandmine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ihandmine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/handmine@outlook.com" title="E-Mail → handmine@outlook.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果子</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">221k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:21</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/tororo.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

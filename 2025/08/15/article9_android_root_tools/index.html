@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/OIP.jpg">
+  <link rel="mask-icon" href="/images/OIP.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ihandmine.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Root工具发展历程历史演进时间线12345678910112008年：Android 1.0发布，Root概念出现2009年：Superuser.apk诞生，最早的Root管理工具2010年：SuperSU发布，成为主流Root方案2012年：Chainfire开发CF-Auto-Root2014年：KingRoot发布，基于漏洞利用的Root方案2016年：Magisk发布，引入模块化Root">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Root工具原理深度解析：从Magisk到KernelSU的技术演进">
+<meta property="og:url" content="https://ihandmine.github.io/2025/08/15/article9_android_root_tools/index.html">
+<meta property="og:site_name" content="一枚酸心果子">
+<meta property="og:description" content="Root工具发展历程历史演进时间线12345678910112008年：Android 1.0发布，Root概念出现2009年：Superuser.apk诞生，最早的Root管理工具2010年：SuperSU发布，成为主流Root方案2012年：Chainfire开发CF-Auto-Root2014年：KingRoot发布，基于漏洞利用的Root方案2016年：Magisk发布，引入模块化Root">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-08-15T07:24:44.000Z">
+<meta property="article:modified_time" content="2025-10-17T03:41:21.772Z">
+<meta property="article:author" content="果子">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Root">
+<meta property="article:tag" content="工具原理">
+<meta property="article:tag" content="深度解析">
+<meta property="article:tag" content="传统">
+<meta property="article:tag" content="现代">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://ihandmine.github.io/2025/08/15/article9_android_root_tools/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Android Root工具原理深度解析：从Magisk到KernelSU的技术演进 | 一枚酸心果子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一枚酸心果子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">果子果子果子果子果子~~~</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">21</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/ihandmine" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/08/15/article9_android_root_tools/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Android Root工具原理深度解析：从Magisk到KernelSU的技术演进
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-15 15:24:44" itemprop="dateCreated datePublished" datetime="2025-08-15T15:24:44+08:00">2025-08-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:41:21" itemprop="dateModified" datetime="2025-10-17T11:41:21+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>20k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>18 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Root工具发展历程"><a href="#Root工具发展历程" class="headerlink" title="Root工具发展历程"></a>Root工具发展历程</h2><h3 id="历史演进时间线"><a href="#历史演进时间线" class="headerlink" title="历史演进时间线"></a>历史演进时间线</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">2008</span><span class="string">年：Android</span> <span class="number">1.0</span><span class="string">发布，Root概念出现</span></span><br><span class="line"><span class="number">2009</span><span class="string">年：Superuser.apk诞生，最早的Root管理工具</span></span><br><span class="line"><span class="number">2010</span><span class="string">年：SuperSU发布，成为主流Root方案</span></span><br><span class="line"><span class="number">2012</span><span class="string">年：Chainfire开发CF-Auto-Root</span></span><br><span class="line"><span class="number">2014</span><span class="string">年：KingRoot发布，基于漏洞利用的Root方案</span></span><br><span class="line"><span class="number">2016</span><span class="string">年：Magisk发布，引入模块化Root概念</span></span><br><span class="line"><span class="number">2017</span><span class="string">年：LineageOS</span> <span class="string">Superuser，开源Root管理</span></span><br><span class="line"><span class="number">2018</span><span class="string">年：MagiskHide发布，绕过SafetyNet检测</span></span><br><span class="line"><span class="number">2021</span><span class="string">年：KernelSU发布，基于内核的Root方案</span></span><br><span class="line"><span class="number">2022</span><span class="string">年：APatch发布，Magisk的现代化替代品</span></span><br><span class="line"><span class="number">2023</span><span class="string">年：KernelSU分支发展，支持更多设备</span></span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+<h3 id="技术发展特点"><a href="#技术发展特点" class="headerlink" title="技术发展特点"></a>技术发展特点</h3><ul>
+<li><strong>早期阶段</strong>：直接修改系统文件，破坏系统完整性</li>
+<li><strong>中期阶段</strong>：通过Hook系统调用实现权限提升</li>
+<li><strong>现代阶段</strong>：模块化设计，保持系统完整性</li>
+<li><strong>最新阶段</strong>：内核级实现，性能和安全并重</li>
+</ul>
+<h2 id="传统Root工具原理分析"><a href="#传统Root工具原理分析" class="headerlink" title="传统Root工具原理分析"></a>传统Root工具原理分析</h2><h3 id="SuperSU技术原理"><a href="#SuperSU技术原理" class="headerlink" title="SuperSU技术原理"></a>SuperSU技术原理</h3><h4 id="1-核心架构"><a href="#1-核心架构" class="headerlink" title="1. 核心架构"></a>1. 核心架构</h4><figure class="highlight scss"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">用户空间应用层</span><br><span class="line">    ↓</span><br><span class="line">SuperSU<span class="selector-class">.apk</span> (权限管理界面)</span><br><span class="line">    ↓</span><br><span class="line">su二进制文件 (权限提升工具)</span><br><span class="line">    ↓</span><br><span class="line">daemonsu守护进程 (权限控制核心)</span><br><span class="line">    ↓</span><br><span class="line">Linux内核 (系统调用层)</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-权限提升机制"><a href="#2-权限提升机制" class="headerlink" title="2. 权限提升机制"></a>2. 权限提升机制</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// su二进制文件核心逻辑</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> *argv[])</span> &#123;</span><br><span class="line">    <span class="comment">// 检查调用者权限</span></span><br><span class="line">    <span class="keyword">if</span> (check_caller_permission() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 获取目标用户ID</span></span><br><span class="line">    <span class="type">uid_t</span> target_uid = get_target_uid(argv[<span class="number">1</span>]);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 通过setuid系统调用提升权限</span></span><br><span class="line">    <span class="keyword">if</span> (setuid(<span class="number">0</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">// 执行目标命令</span></span><br><span class="line">        execv(target_command, target_args);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-守护进程实现"><a href="#3-守护进程实现" class="headerlink" title="3. 守护进程实现"></a>3. 守护进程实现</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// daemonsu守护进程核心代码</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">daemon_main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 创建socket监听权限请求</span></span><br><span class="line">    <span class="type">int</span> server_fd = create_unix_socket(<span class="string">&quot;/data/su/su&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// 接受权限请求</span></span><br><span class="line">        <span class="type">int</span> client_fd = accept(server_fd, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 处理权限请求</span></span><br><span class="line">        handle_su_request(client_fd);</span><br><span class="line">        </span><br><span class="line">        close(client_fd);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">handle_su_request</span><span class="params">(<span class="type">int</span> client_fd)</span> &#123;</span><br><span class="line">    <span class="comment">// 读取请求数据</span></span><br><span class="line">    <span class="type">su_request_t</span> request;</span><br><span class="line">    read(client_fd, &amp;request, <span class="keyword">sizeof</span>(request));</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查权限策略</span></span><br><span class="line">    <span class="keyword">if</span> (check_policy(request.uid, request.command) == ALLOW) &#123;</span><br><span class="line">        <span class="comment">// 授权执行</span></span><br><span class="line">        grant_permission(client_fd, request);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 拒绝执行</span></span><br><span class="line">        deny_permission(client_fd, request);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="KingRoot技术原理"><a href="#KingRoot技术原理" class="headerlink" title="KingRoot技术原理"></a>KingRoot技术原理</h3><h4 id="1-漏洞利用机制"><a href="#1-漏洞利用机制" class="headerlink" title="1. 漏洞利用机制"></a>1. 漏洞利用机制</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// KingRoot漏洞利用示例</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">exploit_vulnerability</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 利用Android系统漏洞</span></span><br><span class="line">    <span class="type">int</span> fd = open(<span class="string">&quot;/dev/ashmem&quot;</span>, O_RDWR);</span><br><span class="line">    <span class="keyword">if</span> (fd &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 构造恶意数据触发漏洞</span></span><br><span class="line">    <span class="type">char</span> exploit_data[<span class="number">1024</span>];</span><br><span class="line">    <span class="built_in">memset</span>(exploit_data, <span class="number">0x41</span>, <span class="keyword">sizeof</span>(exploit_data));</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 通过ioctl触发提权</span></span><br><span class="line">    <span class="keyword">if</span> (ioctl(fd, ASHMEM_SET_NAME, exploit_data) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">// 成功获取Root权限</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    close(fd);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-多漏洞利用策略"><a href="#2-多漏洞利用策略" class="headerlink" title="2. 多漏洞利用策略"></a>2. 多漏洞利用策略</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># KingRoot漏洞检测脚本</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">detect_vulnerabilities</span>():</span><br><span class="line">    vulnerabilities = []</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 检测CVE-2014-3153 (Towelroot)</span></span><br><span class="line">    <span class="keyword">if</span> check_cve_2014_3153():</span><br><span class="line">        vulnerabilities.append(<span class="string">&quot;CVE-2014-3153&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 检测CVE-2015-3636 (PingPongRoot)</span></span><br><span class="line">    <span class="keyword">if</span> check_cve_2015_3636():</span><br><span class="line">        vulnerabilities.append(<span class="string">&quot;CVE-2015-3636&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 检测CVE-2016-5195 (Dirty COW)</span></span><br><span class="line">    <span class="keyword">if</span> check_cve_2016_5195():</span><br><span class="line">        vulnerabilities.append(<span class="string">&quot;CVE-2016-5195&quot;</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> vulnerabilities</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">check_cve_2014_3153</span>():</span><br><span class="line">    <span class="string">&quot;&quot;&quot;检测Towelroot漏洞&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 尝试利用futex漏洞</span></span><br><span class="line">        <span class="keyword">import</span> ctypes</span><br><span class="line">        libc = ctypes.CDLL(<span class="string">&quot;libc.so&quot;</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 构造futex调用</span></span><br><span class="line">        futex_addr = <span class="number">0x40000000</span></span><br><span class="line">        libc.futex(futex_addr, <span class="number">0x80</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 检查是否成功提权</span></span><br><span class="line">        <span class="keyword">return</span> getuid() == <span class="number">0</span></span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="现代Root工具原理分析"><a href="#现代Root工具原理分析" class="headerlink" title="现代Root工具原理分析"></a>现代Root工具原理分析</h2><h3 id="Magisk技术原理"><a href="#Magisk技术原理" class="headerlink" title="Magisk技术原理"></a>Magisk技术原理</h3><h4 id="1-系统完整性保护"><a href="#1-系统完整性保护" class="headerlink" title="1. 系统完整性保护"></a>1. 系统完整性保护</h4><figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">传统<span class="built_in">Root</span>方案：</span><br><span class="line">系统分区被修改 → 无法通过<span class="variable">SafetyNet</span>检测</span><br><span class="line"></span><br><span class="line"><span class="variable">Magisk</span>方案：</span><br><span class="line">系统分区保持原样 → 通过<span class="variable">Hook</span>机制实现<span class="built_in">Root</span></span><br><span class="line">    ↓</span><br><span class="line"><span class="variable">Magisk</span>模块注入 → 运行时修改系统行为</span><br><span class="line">    ↓</span><br><span class="line"><span class="variable">Zygote</span>进程<span class="variable">Hook</span> → 影响所有应用进程</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-核心实现机制"><a href="#2-核心实现机制" class="headerlink" title="2. 核心实现机制"></a>2. 核心实现机制</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Magisk核心Hook实现</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">magisk_hook_init</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 初始化Magisk环境</span></span><br><span class="line">    <span class="keyword">if</span> (init_magisk_env() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook关键系统调用</span></span><br><span class="line">    hook_syscall(__NR_openat, magisk_openat);</span><br><span class="line">    hook_syscall(__NR_faccessat, magisk_faccessat);</span><br><span class="line">    hook_syscall(__NR_stat, magisk_stat);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook Zygote进程</span></span><br><span class="line">    hook_zygote_process();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Hook openat系统调用</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">magisk_openat</span><span class="params">(<span class="type">int</span> dirfd, <span class="type">const</span> <span class="type">char</span> *pathname, <span class="type">int</span> flags, <span class="type">mode_t</span> mode)</span> &#123;</span><br><span class="line">    <span class="comment">// 检查是否为su命令</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strstr</span>(pathname, <span class="string">&quot;su&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="comment">// 重定向到Magisk的su</span></span><br><span class="line">        <span class="keyword">return</span> original_openat(dirfd, <span class="string">&quot;/data/adb/magisk/su&quot;</span>, flags, mode);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查是否为系统文件</span></span><br><span class="line">    <span class="keyword">if</span> (is_system_file(pathname)) &#123;</span><br><span class="line">        <span class="comment">// 应用Magisk模块修改</span></span><br><span class="line">        <span class="keyword">return</span> apply_magisk_modules(pathname);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 正常调用原始函数</span></span><br><span class="line">    <span class="keyword">return</span> original_openat(dirfd, pathname, flags, mode);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-模块系统实现"><a href="#3-模块系统实现" class="headerlink" title="3. 模块系统实现"></a>3. 模块系统实现</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Magisk模块加载机制</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">load_magisk_module</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *module_path)</span> &#123;</span><br><span class="line">    <span class="comment">// 解析模块配置</span></span><br><span class="line">    <span class="type">module_info_t</span> *info = parse_module_prop(module_path);</span><br><span class="line">    <span class="keyword">if</span> (!info) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 加载模块脚本</span></span><br><span class="line">    <span class="keyword">if</span> (info-&gt;post_fs_data) &#123;</span><br><span class="line">        execute_script(info-&gt;post_fs_data);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 应用模块修改</span></span><br><span class="line">    apply_module_modifications(info);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 注册模块服务</span></span><br><span class="line">    register_module_services(info);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 模块修改应用</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">apply_module_modifications</span><span class="params">(<span class="type">module_info_t</span> *info)</span> &#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; info-&gt;mod_count; i++) &#123;</span><br><span class="line">        <span class="type">module_mod_t</span> *mod = &amp;info-&gt;mods[i];</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">switch</span> (mod-&gt;type) &#123;</span><br><span class="line">            <span class="keyword">case</span> MOD_TYPE_FILE:</span><br><span class="line">                <span class="comment">// 文件替换</span></span><br><span class="line">                replace_file(mod-&gt;target, mod-&gt;source);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">                </span><br><span class="line">            <span class="keyword">case</span> MOD_TYPE_PROP:</span><br><span class="line">                <span class="comment">// 属性修改</span></span><br><span class="line">                set_prop(mod-&gt;key, mod-&gt;value);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">                </span><br><span class="line">            <span class="keyword">case</span> MOD_TYPE_SERVICE:</span><br><span class="line">                <span class="comment">// 服务修改</span></span><br><span class="line">                modify_service(mod-&gt;service_name, mod-&gt;modifications);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="KernelSU技术原理"><a href="#KernelSU技术原理" class="headerlink" title="KernelSU技术原理"></a>KernelSU技术原理</h3><h4 id="1-内核级Root实现"><a href="#1-内核级Root实现" class="headerlink" title="1. 内核级Root实现"></a>1. 内核级Root实现</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// KernelSU内核模块核心代码</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">kernelsu_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 初始化KernelSU</span></span><br><span class="line">    <span class="keyword">if</span> (init_kernelsu() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 注册系统调用Hook</span></span><br><span class="line">    register_syscall_hooks();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建proc文件系统接口</span></span><br><span class="line">    create_proc_interface();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 系统调用Hook实现</span></span><br><span class="line"><span class="type">static</span> <span class="type">long</span> <span class="title function_">kernelsu_syscall_hook</span><span class="params">(<span class="keyword">struct</span> pt_regs *regs)</span> &#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">long</span> syscall_nr = regs-&gt;orig_ax;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">switch</span> (syscall_nr) &#123;</span><br><span class="line">        <span class="keyword">case</span> __NR_openat:</span><br><span class="line">            <span class="keyword">return</span> kernelsu_openat(regs);</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">case</span> __NR_execve:</span><br><span class="line">            <span class="keyword">return</span> kernelsu_execve(regs);</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">case</span> __NR_access:</span><br><span class="line">            <span class="keyword">return</span> kernelsu_access(regs);</span><br><span class="line">            </span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> original_syscall(regs);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-权限管理机制"><a href="#2-权限管理机制" class="headerlink" title="2. 权限管理机制"></a>2. 权限管理机制</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// KernelSU权限检查</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">kernelsu_check_permission</span><span class="params">(<span class="type">uid_t</span> uid, <span class="type">const</span> <span class="type">char</span> *command)</span> &#123;</span><br><span class="line">    <span class="comment">// 检查用户是否在允许列表中</span></span><br><span class="line">    <span class="keyword">if</span> (!is_user_allowed(uid)) &#123;</span><br><span class="line">        <span class="keyword">return</span> PERMISSION_DENIED;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查命令是否被允许</span></span><br><span class="line">    <span class="keyword">if</span> (!is_command_allowed(command)) &#123;</span><br><span class="line">        <span class="keyword">return</span> PERMISSION_DENIED;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查时间限制</span></span><br><span class="line">    <span class="keyword">if</span> (!is_time_allowed()) &#123;</span><br><span class="line">        <span class="keyword">return</span> PERMISSION_DENIED;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> PERMISSION_GRANTED;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 权限提升实现</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">kernelsu_elevate_privilege</span><span class="params">(<span class="type">uid_t</span> target_uid)</span> &#123;</span><br><span class="line">    <span class="comment">// 检查当前进程权限</span></span><br><span class="line">    <span class="keyword">if</span> (current-&gt;cred-&gt;uid.val != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> -EPERM;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 修改目标进程的凭据</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">cred</span> *<span class="title">new_cred</span> =</span> prepare_creds();</span><br><span class="line">    <span class="keyword">if</span> (!new_cred) &#123;</span><br><span class="line">        <span class="keyword">return</span> -ENOMEM;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设置Root权限</span></span><br><span class="line">    new_cred-&gt;uid.val = <span class="number">0</span>;</span><br><span class="line">    new_cred-&gt;gid.val = <span class="number">0</span>;</span><br><span class="line">    new_cred-&gt;euid.val = <span class="number">0</span>;</span><br><span class="line">    new_cred-&gt;egid.val = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 应用新凭据</span></span><br><span class="line">    commit_creds(new_cred);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="APatch技术原理"><a href="#APatch技术原理" class="headerlink" title="APatch技术原理"></a>APatch技术原理</h3><h4 id="1-现代化Magisk替代品"><a href="#1-现代化Magisk替代品" class="headerlink" title="1. 现代化Magisk替代品"></a>1. 现代化Magisk替代品</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// APatch核心实现</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">apatch_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 初始化APatch环境</span></span><br><span class="line">    <span class="keyword">if</span> (init_apatch_env() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 注册模块系统</span></span><br><span class="line">    register_module_system();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启用安全增强</span></span><br><span class="line">    enable_security_enhancements();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 模块加载机制</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">apatch_load_module</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *module_path)</span> &#123;</span><br><span class="line">    <span class="comment">// 验证模块签名</span></span><br><span class="line">    <span class="keyword">if</span> (!verify_module_signature(module_path)) &#123;</span><br><span class="line">        <span class="keyword">return</span> -EINVAL;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 加载模块配置</span></span><br><span class="line">    <span class="type">module_config_t</span> *config = parse_module_config(module_path);</span><br><span class="line">    <span class="keyword">if</span> (!config) &#123;</span><br><span class="line">        <span class="keyword">return</span> -ENOMEM;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 应用模块修改</span></span><br><span class="line">    <span class="keyword">return</span> apply_module_changes(config);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-安全增强特性"><a href="#2-安全增强特性" class="headerlink" title="2. 安全增强特性"></a>2. 安全增强特性</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// APatch安全增强</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">enable_security_enhancements</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 启用SELinux增强</span></span><br><span class="line">    <span class="keyword">if</span> (enable_selinux_enhancement() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启用内存保护</span></span><br><span class="line">    <span class="keyword">if</span> (enable_memory_protection() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启用反调试保护</span></span><br><span class="line">    <span class="keyword">if</span> (enable_anti_debug() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="KernelSU分支分析"><a href="#KernelSU分支分析" class="headerlink" title="KernelSU分支分析"></a>KernelSU分支分析</h3><h4 id="1-官方KernelSU"><a href="#1-官方KernelSU" class="headerlink" title="1. 官方KernelSU"></a>1. 官方KernelSU</h4><p><strong>特点</strong>：</p>
+<ul>
+<li>基于内核模块实现</li>
+<li>支持Android 4.14+</li>
+<li>完整的权限管理系统</li>
+<li>活跃的社区支持</li>
+</ul>
+<p><strong>技术实现</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 官方KernelSU核心特性</span></span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">kernelsu_ops</span> <span class="title">official_ops</span> =</span> &#123;</span><br><span class="line">    .check_permission = kernelsu_check_permission,</span><br><span class="line">    .grant_permission = kernelsu_grant_permission,</span><br><span class="line">    .revoke_permission = kernelsu_revoke_permission,</span><br><span class="line">    .get_uid_list = kernelsu_get_uid_list,</span><br><span class="line">    .is_uid_granted = kernelsu_is_uid_granted</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-KernelSU-Mod"><a href="#2-KernelSU-Mod" class="headerlink" title="2. KernelSU-Mod"></a>2. KernelSU-Mod</h4><p><strong>特点</strong>：</p>
+<ul>
+<li>官方KernelSU的修改版本</li>
+<li>增加更多自定义功能</li>
+<li>支持更多设备</li>
+<li>提供更多配置选项</li>
+</ul>
+<p><strong>增强功能</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// KernelSU-Mod增强功能</span></span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">kernelsu_mod_ops</span> <span class="title">mod_ops</span> =</span> &#123;</span><br><span class="line">    .check_permission = kernelsu_mod_check_permission,</span><br><span class="line">    .grant_permission = kernelsu_mod_grant_permission,</span><br><span class="line">    .revoke_permission = kernelsu_mod_revoke_permission,</span><br><span class="line">    .get_uid_list = kernelsu_mod_get_uid_list,</span><br><span class="line">    .is_uid_granted = kernelsu_mod_is_uid_granted,</span><br><span class="line">    <span class="comment">// 新增功能</span></span><br><span class="line">    .set_auto_grant = kernelsu_mod_set_auto_grant,</span><br><span class="line">    .set_timeout = kernelsu_mod_set_timeout,</span><br><span class="line">    .set_log_level = kernelsu_mod_set_log_level</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-KernelSU-Android"><a href="#3-KernelSU-Android" class="headerlink" title="3. KernelSU-Android"></a>3. KernelSU-Android</h4><p><strong>特点</strong>：</p>
+<ul>
+<li>针对Android 12+优化</li>
+<li>更好的SELinux支持</li>
+<li>改进的权限管理</li>
+<li>增强的安全性</li>
+</ul>
+<p><strong>Android 12+优化</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Android 12+优化实现</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">kernelsu_android12_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 适配Android 12的SELinux策略</span></span><br><span class="line">    <span class="keyword">if</span> (adapt_selinux_policy() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 适配新的权限模型</span></span><br><span class="line">    <span class="keyword">if</span> (adapt_permission_model() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启用新的安全特性</span></span><br><span class="line">    <span class="keyword">if</span> (enable_new_security_features() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="LineageOS-Superuser"><a href="#LineageOS-Superuser" class="headerlink" title="LineageOS Superuser"></a>LineageOS Superuser</h3><h4 id="1-开源Root管理"><a href="#1-开源Root管理" class="headerlink" title="1. 开源Root管理"></a>1. 开源Root管理</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// LineageOS Superuser实现</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">LineageOSSuperuser</span> <span class="keyword">extends</span> <span class="title class_">Superuser</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">checkPermission</span><span class="params">(<span class="type">int</span> uid, String command)</span> &#123;</span><br><span class="line">        <span class="comment">// 基于策略的权限检查</span></span><br><span class="line">        <span class="type">Policy</span> <span class="variable">policy</span> <span class="operator">=</span> getPolicyForUid(uid);</span><br><span class="line">        <span class="keyword">if</span> (policy == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> policy.isCommandAllowed(command);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">grantPermission</span><span class="params">(<span class="type">int</span> uid, String command)</span> &#123;</span><br><span class="line">        <span class="comment">// 记录权限授予</span></span><br><span class="line">        logPermissionGrant(uid, command);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 更新策略</span></span><br><span class="line">        updatePolicy(uid, command, <span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-集成特性"><a href="#2-集成特性" class="headerlink" title="2. 集成特性"></a>2. 集成特性</h4><ul>
+<li>与LineageOS深度集成</li>
+<li>支持多用户环境</li>
+<li>完整的日志记录</li>
+<li>开源透明</li>
+</ul>
+<h3 id="其他Root工具"><a href="#其他Root工具" class="headerlink" title="其他Root工具"></a>其他Root工具</h3><h4 id="1-CF-Auto-Root"><a href="#1-CF-Auto-Root" class="headerlink" title="1. CF-Auto-Root"></a>1. CF-Auto-Root</h4><p><strong>特点</strong>：</p>
+<ul>
+<li>针对特定设备的一键Root</li>
+<li>基于漏洞利用</li>
+<li>支持设备广泛</li>
+<li>操作简单</li>
+</ul>
+<p><strong>技术原理</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// CF-Auto-Root漏洞利用</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">cf_auto_root_exploit</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 利用设备特定漏洞</span></span><br><span class="line">    <span class="keyword">if</span> (exploit_device_vulnerability() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 获取Root权限</span></span><br><span class="line">    <span class="keyword">if</span> (gain_root_access() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 安装SuperSU</span></span><br><span class="line">    <span class="keyword">if</span> (install_supersu() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-KingRoot"><a href="#2-KingRoot" class="headerlink" title="2. KingRoot"></a>2. KingRoot</h4><p><strong>特点</strong>：</p>
+<ul>
+<li>基于多漏洞利用</li>
+<li>支持设备广泛</li>
+<li>一键Root操作</li>
+<li>商业化运营</li>
+</ul>
+<p><strong>多漏洞利用</strong>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// KingRoot多漏洞利用策略</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">kingroot_exploit</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 尝试多个漏洞</span></span><br><span class="line">    <span class="type">int</span> exploits[] = &#123;</span><br><span class="line">        CVE_2014_3153,  <span class="comment">// Towelroot</span></span><br><span class="line">        CVE_2015_3636,  <span class="comment">// PingPongRoot</span></span><br><span class="line">        CVE_2016_5195,  <span class="comment">// Dirty COW</span></span><br><span class="line">        CVE_2017_0781,  <span class="comment">// BlueBorne</span></span><br><span class="line">        CVE_2018_9445   <span class="comment">// 其他漏洞</span></span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="keyword">sizeof</span>(exploits)/<span class="keyword">sizeof</span>(exploits[<span class="number">0</span>]); i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (try_exploit(exploits[i]) == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;  <span class="comment">// 成功</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;  <span class="comment">// 失败</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Root工具技术对比"><a href="#Root工具技术对比" class="headerlink" title="Root工具技术对比"></a>Root工具技术对比</h2><h3 id="技术架构对比"><a href="#技术架构对比" class="headerlink" title="技术架构对比"></a>技术架构对比</h3><table>
+<thead>
+<tr>
+<th>特性</th>
+<th>SuperSU</th>
+<th>Magisk</th>
+<th>APatch</th>
+<th>KernelSU</th>
+<th>KernelSU-Mod</th>
+<th>LineageOS Superuser</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>实现层级</strong></td>
+<td>用户空间</td>
+<td>用户空间+内核</td>
+<td>用户空间+内核</td>
+<td>内核空间</td>
+<td>内核空间</td>
+<td>用户空间</td>
+</tr>
+<tr>
+<td><strong>系统完整性</strong></td>
+<td>破坏</td>
+<td>保持</td>
+<td>保持</td>
+<td>保持</td>
+<td>保持</td>
+<td>破坏</td>
+</tr>
+<tr>
+<td><strong>模块化支持</strong></td>
+<td>无</td>
+<td>完整</td>
+<td>完整</td>
+<td>部分</td>
+<td>部分</td>
+<td>无</td>
+</tr>
+<tr>
+<td><strong>SafetyNet绕过</strong></td>
+<td>不支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>不支持</td>
+</tr>
+<tr>
+<td><strong>性能影响</strong></td>
+<td>中等</td>
+<td>低</td>
+<td>低</td>
+<td>最低</td>
+<td>最低</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>稳定性</strong></td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+<td>最高</td>
+<td>最高</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>安全性</strong></td>
+<td>中等</td>
+<td>高</td>
+<td>最高</td>
+<td>高</td>
+<td>高</td>
+<td>中等</td>
+</tr>
+<tr>
+<td><strong>易用性</strong></td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+<td>中等</td>
+<td>中等</td>
+<td>高</td>
+</tr>
+<tr>
+<td><strong>社区支持</strong></td>
+<td>停止</td>
+<td>活跃</td>
+<td>活跃</td>
+<td>活跃</td>
+<td>中等</td>
+<td>活跃</td>
+</tr>
+<tr>
+<td><strong>设备兼容性</strong></td>
+<td>广泛</td>
+<td>广泛</td>
+<td>广泛</td>
+<td>有限</td>
+<td>有限</td>
+<td>广泛</td>
+</tr>
+</tbody></table>
+<h3 id="详细优缺点分析"><a href="#详细优缺点分析" class="headerlink" title="详细优缺点分析"></a>详细优缺点分析</h3><h4 id="SuperSU"><a href="#SuperSU" class="headerlink" title="SuperSU"></a>SuperSU</h4><p><strong>优点</strong>：</p>
+<ul>
+<li>成熟稳定，经过长期验证</li>
+<li>设备兼容性极佳</li>
+<li>操作简单，用户友好</li>
+<li>权限管理功能完善</li>
+<li>支持多用户环境</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>破坏系统完整性</li>
+<li>无法通过SafetyNet检测</li>
+<li>不支持模块化扩展</li>
+<li>开发已停止，无更新</li>
+<li>安全性相对较低</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>老旧设备Root</li>
+<li>对系统完整性要求不高</li>
+<li>需要简单稳定的Root方案</li>
+</ul>
+<h4 id="Magisk"><a href="#Magisk" class="headerlink" title="Magisk"></a>Magisk</h4><p><strong>优点</strong>：</p>
+<ul>
+<li>保持系统完整性</li>
+<li>支持模块化扩展</li>
+<li>可以绕过SafetyNet检测</li>
+<li>活跃的社区支持</li>
+<li>功能丰富，可定制性强</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>学习成本较高</li>
+<li>模块管理复杂</li>
+<li>某些设备兼容性问题</li>
+<li>依赖Zygote进程Hook</li>
+<li>可能被检测和绕过</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>需要保持系统完整性</li>
+<li>需要模块化功能</li>
+<li>需要绕过安全检测</li>
+<li>对功能扩展有要求</li>
+</ul>
+<h4 id="APatch"><a href="#APatch" class="headerlink" title="APatch"></a>APatch</h4><p><strong>优点</strong>：</p>
+<ul>
+<li>基于Magisk的现代化改进</li>
+<li>增强的安全特性</li>
+<li>更好的SELinux支持</li>
+<li>改进的模块系统</li>
+<li>更稳定的性能</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>相对较新，稳定性待验证</li>
+<li>社区支持有限</li>
+<li>文档不够完善</li>
+<li>某些功能可能不兼容</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>需要最新安全特性</li>
+<li>对性能有较高要求</li>
+<li>愿意尝试新技术</li>
+<li>需要更好的安全保护</li>
+</ul>
+<h4 id="KernelSU"><a href="#KernelSU" class="headerlink" title="KernelSU"></a>KernelSU</h4><p><strong>优点</strong>：</p>
+<ul>
+<li>内核级实现，性能最佳</li>
+<li>极高的稳定性</li>
+<li>难以被检测和绕过</li>
+<li>资源占用最少</li>
+<li>安全性最高</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>需要内核源码支持</li>
+<li>设备兼容性有限</li>
+<li>安装和配置复杂</li>
+<li>调试困难</li>
+<li>对内核版本有要求</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>对性能要求极高</li>
+<li>需要最高安全性</li>
+<li>有技术能力维护</li>
+<li>支持的内核版本</li>
+</ul>
+<h4 id="KernelSU-Mod"><a href="#KernelSU-Mod" class="headerlink" title="KernelSU-Mod"></a>KernelSU-Mod</h4><p><strong>优点</strong>：</p>
+<ul>
+<li>基于KernelSU的增强版本</li>
+<li>更多自定义功能</li>
+<li>支持更多设备</li>
+<li>提供更多配置选项</li>
+<li>改进的用户体验</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>非官方版本，稳定性待验证</li>
+<li>更新可能不及时</li>
+<li>某些功能可能不稳定</li>
+<li>社区支持有限</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>需要KernelSU的增强功能</li>
+<li>对自定义配置有要求</li>
+<li>愿意使用非官方版本</li>
+<li>有技术能力处理问题</li>
+</ul>
+<h4 id="LineageOS-Superuser-1"><a href="#LineageOS-Superuser-1" class="headerlink" title="LineageOS Superuser"></a>LineageOS Superuser</h4><p><strong>优点</strong>：</p>
+<ul>
+<li>完全开源透明</li>
+<li>与LineageOS深度集成</li>
+<li>支持多用户环境</li>
+<li>完整的日志记录</li>
+<li>社区驱动开发</li>
+</ul>
+<p><strong>缺点</strong>：</p>
+<ul>
+<li>仅适用于LineageOS</li>
+<li>功能相对简单</li>
+<li>不支持模块化</li>
+<li>无法绕过安全检测</li>
+<li>设备支持有限</li>
+</ul>
+<p><strong>适用场景</strong>：</p>
+<ul>
+<li>使用LineageOS系统</li>
+<li>需要开源解决方案</li>
+<li>对透明度有要求</li>
+<li>不需要复杂功能</li>
+</ul>
+<h3 id="性能对比测试"><a href="#性能对比测试" class="headerlink" title="性能对比测试"></a>性能对比测试</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Root工具性能测试脚本</span></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> subprocess</span><br><span class="line"><span class="keyword">import</span> psutil</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RootToolPerformanceTest</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="variable language_">self</span>.results = &#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test_startup_time</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;测试启动时间&quot;&quot;&quot;</span></span><br><span class="line">        tools = [<span class="string">&#x27;supersu&#x27;</span>, <span class="string">&#x27;magisk&#x27;</span>, <span class="string">&#x27;apatch&#x27;</span>, <span class="string">&#x27;kernelsu&#x27;</span>]</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> tool <span class="keyword">in</span> tools:</span><br><span class="line">            start_time = time.time()</span><br><span class="line">            <span class="comment"># 模拟启动Root工具</span></span><br><span class="line">            <span class="variable language_">self</span>.simulate_tool_startup(tool)</span><br><span class="line">            end_time = time.time()</span><br><span class="line">            </span><br><span class="line">            <span class="variable language_">self</span>.results[tool] = &#123;</span><br><span class="line">                <span class="string">&#x27;startup_time&#x27;</span>: end_time - start_time</span><br><span class="line">            &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test_memory_usage</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;测试内存使用&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">for</span> tool <span class="keyword">in</span> <span class="variable language_">self</span>.results.keys():</span><br><span class="line">            <span class="comment"># 获取内存使用情况</span></span><br><span class="line">            memory_usage = psutil.virtual_memory().percent</span><br><span class="line">            <span class="variable language_">self</span>.results[tool][<span class="string">&#x27;memory_usage&#x27;</span>] = memory_usage</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">test_permission_check_speed</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;测试权限检查速度&quot;&quot;&quot;</span></span><br><span class="line">        <span class="keyword">for</span> tool <span class="keyword">in</span> <span class="variable language_">self</span>.results.keys():</span><br><span class="line">            start_time = time.time()</span><br><span class="line">            <span class="comment"># 模拟权限检查</span></span><br><span class="line">            <span class="variable language_">self</span>.simulate_permission_check(tool)</span><br><span class="line">            end_time = time.time()</span><br><span class="line">            </span><br><span class="line">            <span class="variable language_">self</span>.results[tool][<span class="string">&#x27;permission_check_time&#x27;</span>] = end_time - start_time</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">generate_report</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;生成性能报告&quot;&quot;&quot;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Root工具性能对比报告&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;=&quot;</span> * <span class="number">50</span>)</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> tool, metrics <span class="keyword">in</span> <span class="variable language_">self</span>.results.items():</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;\n<span class="subst">&#123;tool.upper()&#125;</span>:&quot;</span>)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;  启动时间: <span class="subst">&#123;metrics[<span class="string">&#x27;startup_time&#x27;</span>]:<span class="number">.3</span>f&#125;</span>s&quot;</span>)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;  内存使用: <span class="subst">&#123;metrics[<span class="string">&#x27;memory_usage&#x27;</span>]:<span class="number">.1</span>f&#125;</span>%&quot;</span>)</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">f&quot;  权限检查: <span class="subst">&#123;metrics[<span class="string">&#x27;permission_check_time&#x27;</span>]:<span class="number">.3</span>f&#125;</span>s&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="安全性对比分析"><a href="#安全性对比分析" class="headerlink" title="安全性对比分析"></a>安全性对比分析</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Root工具安全性分析</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">RootToolSecurityAnalyzer</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="variable language_">self</span>.security_metrics = &#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">analyze_security_level</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;分析安全级别&quot;&quot;&quot;</span></span><br><span class="line">        tools = &#123;</span><br><span class="line">            <span class="string">&#x27;SuperSU&#x27;</span>: &#123;</span><br><span class="line">                <span class="string">&#x27;system_integrity&#x27;</span>: <span class="string">&#x27;Low&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;detection_resistance&#x27;</span>: <span class="string">&#x27;Low&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;permission_control&#x27;</span>: <span class="string">&#x27;Medium&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;audit_logging&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;overall_security&#x27;</span>: <span class="string">&#x27;Medium&#x27;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">&#x27;Magisk&#x27;</span>: &#123;</span><br><span class="line">                <span class="string">&#x27;system_integrity&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;detection_resistance&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;permission_control&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;audit_logging&#x27;</span>: <span class="string">&#x27;Medium&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;overall_security&#x27;</span>: <span class="string">&#x27;High&#x27;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">&#x27;APatch&#x27;</span>: &#123;</span><br><span class="line">                <span class="string">&#x27;system_integrity&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;detection_resistance&#x27;</span>: <span class="string">&#x27;Very High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;permission_control&#x27;</span>: <span class="string">&#x27;Very High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;audit_logging&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;overall_security&#x27;</span>: <span class="string">&#x27;Very High&#x27;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">&#x27;KernelSU&#x27;</span>: &#123;</span><br><span class="line">                <span class="string">&#x27;system_integrity&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;detection_resistance&#x27;</span>: <span class="string">&#x27;Very High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;permission_control&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;audit_logging&#x27;</span>: <span class="string">&#x27;Medium&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;overall_security&#x27;</span>: <span class="string">&#x27;Very High&#x27;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">&#x27;KernelSU-Mod&#x27;</span>: &#123;</span><br><span class="line">                <span class="string">&#x27;system_integrity&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;detection_resistance&#x27;</span>: <span class="string">&#x27;Very High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;permission_control&#x27;</span>: <span class="string">&#x27;Very High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;audit_logging&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;overall_security&#x27;</span>: <span class="string">&#x27;Very High&#x27;</span></span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="string">&#x27;LineageOS Superuser&#x27;</span>: &#123;</span><br><span class="line">                <span class="string">&#x27;system_integrity&#x27;</span>: <span class="string">&#x27;Low&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;detection_resistance&#x27;</span>: <span class="string">&#x27;Low&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;permission_control&#x27;</span>: <span class="string">&#x27;Medium&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;audit_logging&#x27;</span>: <span class="string">&#x27;High&#x27;</span>,</span><br><span class="line">                <span class="string">&#x27;overall_security&#x27;</span>: <span class="string">&#x27;Medium&#x27;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> tools</span><br></pre></td></tr></table></figure>
+
+<h3 id="选择建议"><a href="#选择建议" class="headerlink" title="选择建议"></a>选择建议</h3><h4 id="1-根据需求选择"><a href="#1-根据需求选择" class="headerlink" title="1. 根据需求选择"></a>1. 根据需求选择</h4><p><strong>新手用户推荐</strong>：</p>
+<ul>
+<li><strong>SuperSU</strong>：简单稳定，适合入门</li>
+<li><strong>Magisk</strong>：功能丰富，学习成本适中</li>
+</ul>
+<p><strong>高级用户推荐</strong>：</p>
+<ul>
+<li><strong>APatch</strong>：最新技术，安全特性丰富</li>
+<li><strong>KernelSU</strong>：性能最佳，安全性最高</li>
+</ul>
+<p><strong>开发者推荐</strong>：</p>
+<ul>
+<li><strong>KernelSU-Mod</strong>：自定义功能多</li>
+<li><strong>LineageOS Superuser</strong>：开源透明</li>
+</ul>
+<h4 id="2-根据设备选择"><a href="#2-根据设备选择" class="headerlink" title="2. 根据设备选择"></a>2. 根据设备选择</h4><p><strong>老旧设备（Android 7-9）</strong>：</p>
+<ul>
+<li>优先选择：SuperSU</li>
+<li>备选方案：Magisk</li>
+</ul>
+<p><strong>现代设备（Android 10-12）</strong>：</p>
+<ul>
+<li>优先选择：Magisk</li>
+<li>备选方案：APatch</li>
+</ul>
+<p><strong>最新设备（Android 13+）</strong>：</p>
+<ul>
+<li>优先选择：KernelSU</li>
+<li>备选方案：APatch</li>
+</ul>
+<h4 id="3-根据用途选择"><a href="#3-根据用途选择" class="headerlink" title="3. 根据用途选择"></a>3. 根据用途选择</h4><p><strong>日常使用</strong>：</p>
+<ul>
+<li>推荐：Magisk</li>
+<li>理由：功能全面，社区支持好</li>
+</ul>
+<p><strong>安全研究</strong>：</p>
+<ul>
+<li>推荐：KernelSU</li>
+<li>理由：难以检测，安全性高</li>
+</ul>
+<p><strong>系统定制</strong>：</p>
+<ul>
+<li>推荐：APatch</li>
+<li>理由：模块化支持好</li>
+</ul>
+<p><strong>学习研究</strong>：</p>
+<ul>
+<li>推荐：LineageOS Superuser</li>
+<li>理由：开源透明，易于理解</li>
+</ul>
+<h2 id="Root检测与防护"><a href="#Root检测与防护" class="headerlink" title="Root检测与防护"></a>Root检测与防护</h2><h3 id="Root检测技术"><a href="#Root检测技术" class="headerlink" title="Root检测技术"></a>Root检测技术</h3><h4 id="1-传统检测方法"><a href="#1-传统检测方法" class="headerlink" title="1. 传统检测方法"></a>1. 传统检测方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Android Root检测代码</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RootDetector</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isRooted</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> checkSuFiles() || </span><br><span class="line">               checkSuCommands() || </span><br><span class="line">               checkRootApps() || </span><br><span class="line">               checkRootProps();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkSuFiles</span><span class="params">()</span> &#123;</span><br><span class="line">        String[] suPaths = &#123;</span><br><span class="line">            <span class="string">&quot;/system/app/Superuser.apk&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/sbin/su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/system/bin/su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/system/xbin/su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/data/local/xbin/su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/data/local/bin/su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/system/sd/xbin/su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/system/bin/failsafe/su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/data/local/su&quot;</span></span><br><span class="line">        &#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (String path : suPaths) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">new</span> <span class="title class_">File</span>(path).exists()) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkSuCommands</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(<span class="string">&quot;which su&quot;</span>);</span><br><span class="line">            <span class="type">BufferedReader</span> <span class="variable">reader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(process.getInputStream())</span><br><span class="line">            );</span><br><span class="line">            <span class="type">String</span> <span class="variable">line</span> <span class="operator">=</span> reader.readLine();</span><br><span class="line">            <span class="keyword">return</span> line != <span class="literal">null</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkRootApps</span><span class="params">()</span> &#123;</span><br><span class="line">        String[] rootApps = &#123;</span><br><span class="line">            <span class="string">&quot;com.noshufou.android.su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;com.noshufou.android.su.elite&quot;</span>,</span><br><span class="line">            <span class="string">&quot;eu.chainfire.supersu&quot;</span>,</span><br><span class="line">            <span class="string">&quot;com.koushikdutta.superuser&quot;</span>,</span><br><span class="line">            <span class="string">&quot;com.thirdparty.superuser&quot;</span>,</span><br><span class="line">            <span class="string">&quot;com.yellowes.su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;com.topjohnwu.magisk&quot;</span></span><br><span class="line">        &#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="type">PackageManager</span> <span class="variable">pm</span> <span class="operator">=</span> context.getPackageManager();</span><br><span class="line">        <span class="keyword">for</span> (String app : rootApps) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                pm.getPackageInfo(app, <span class="number">0</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (PackageManager.NameNotFoundException e) &#123;</span><br><span class="line">                <span class="comment">// 应用不存在</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkRootProps</span><span class="params">()</span> &#123;</span><br><span class="line">        String[] rootProps = &#123;</span><br><span class="line">            <span class="string">&quot;ro.debuggable&quot;</span>,</span><br><span class="line">            <span class="string">&quot;ro.secure&quot;</span>,</span><br><span class="line">            <span class="string">&quot;ro.build.selinux&quot;</span></span><br><span class="line">        &#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (String prop : rootProps) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> SystemProperties.get(prop, <span class="string">&quot;1&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (<span class="string">&quot;0&quot;</span>.equals(value)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-现代检测方法"><a href="#2-现代检测方法" class="headerlink" title="2. 现代检测方法"></a>2. 现代检测方法</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 现代Root检测技术</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ModernRootDetector</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isRooted</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> checkMagisk() || </span><br><span class="line">               checkKernelSU() || </span><br><span class="line">               checkAPatch() || </span><br><span class="line">               checkRuntimeDetection();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkMagisk</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 检测Magisk特征</span></span><br><span class="line">        <span class="keyword">if</span> (checkMagiskProps()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (checkMagiskFiles()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (checkMagiskModules()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkMagiskProps</span><span class="params">()</span> &#123;</span><br><span class="line">        String[] magiskProps = &#123;</span><br><span class="line">            <span class="string">&quot;ro.magisk.version&quot;</span>,</span><br><span class="line">            <span class="string">&quot;ro.boot.magisk&quot;</span>,</span><br><span class="line">            <span class="string">&quot;persist.magisk.version&quot;</span></span><br><span class="line">        &#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (String prop : magiskProps) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> SystemProperties.get(prop, <span class="string">&quot;&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (!value.isEmpty()) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkRuntimeDetection</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 运行时检测Root行为</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// 尝试执行需要Root权限的操作</span></span><br><span class="line">            <span class="type">Process</span> <span class="variable">process</span> <span class="operator">=</span> Runtime.getRuntime().exec(<span class="string">&quot;su -c id&quot;</span>);</span><br><span class="line">            process.waitFor();</span><br><span class="line">            <span class="keyword">return</span> process.exitValue() == <span class="number">0</span>;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Root防护策略"><a href="#Root防护策略" class="headerlink" title="Root防护策略"></a>Root防护策略</h3><h4 id="1-应用级防护"><a href="#1-应用级防护" class="headerlink" title="1. 应用级防护"></a>1. 应用级防护</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 应用级Root防护</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RootProtection</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">enableRootProtection</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 检测Root环境</span></span><br><span class="line">        <span class="keyword">if</span> (isRooted()) &#123;</span><br><span class="line">            <span class="comment">// 拒绝运行</span></span><br><span class="line">            System.exit(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 启用反调试</span></span><br><span class="line">        enableAntiDebug();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 启用完整性检查</span></span><br><span class="line">        enableIntegrityCheck();</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 启用运行时检测</span></span><br><span class="line">        enableRuntimeDetection();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">enableAntiDebug</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 检测调试器</span></span><br><span class="line">        <span class="keyword">if</span> (Debug.isDebuggerConnected()) &#123;</span><br><span class="line">            System.exit(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 检测Hook框架</span></span><br><span class="line">        <span class="keyword">if</span> (isHookFrameworkDetected()) &#123;</span><br><span class="line">            System.exit(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">enableIntegrityCheck</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 检查应用签名</span></span><br><span class="line">        <span class="keyword">if</span> (!verifyAppSignature()) &#123;</span><br><span class="line">            System.exit(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 检查应用完整性</span></span><br><span class="line">        <span class="keyword">if</span> (!verifyAppIntegrity()) &#123;</span><br><span class="line">            System.exit(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">enableRuntimeDetection</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 定期检测Root状态</span></span><br><span class="line">        <span class="type">Timer</span> <span class="variable">timer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Timer</span>();</span><br><span class="line">        timer.scheduleAtFixedRate(<span class="keyword">new</span> <span class="title class_">TimerTask</span>() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (isRooted()) &#123;</span><br><span class="line">                    System.exit(<span class="number">0</span>);</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, <span class="number">0</span>, <span class="number">5000</span>); <span class="comment">// 每5秒检测一次</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-系统级防护"><a href="#2-系统级防护" class="headerlink" title="2. 系统级防护"></a>2. 系统级防护</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 系统级Root防护</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">root_protection_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 注册安全模块</span></span><br><span class="line">    register_security_module(&amp;root_protection_ops);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启用内核级检测</span></span><br><span class="line">    enable_kernel_root_detection();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启用实时监控</span></span><br><span class="line">    enable_realtime_monitoring();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">root_protection_check_permission</span><span class="params">(<span class="type">uid_t</span> uid, <span class="type">const</span> <span class="type">char</span> *command)</span> &#123;</span><br><span class="line">    <span class="comment">// 检查是否为Root相关命令</span></span><br><span class="line">    <span class="keyword">if</span> (is_root_command(command)) &#123;</span><br><span class="line">        <span class="comment">// 记录安全事件</span></span><br><span class="line">        log_security_event(uid, command);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 检查权限策略</span></span><br><span class="line">        <span class="keyword">if</span> (!is_permission_granted(uid, command)) &#123;</span><br><span class="line">            <span class="keyword">return</span> -EPERM;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="未来发展趋势"><a href="#未来发展趋势" class="headerlink" title="未来发展趋势"></a>未来发展趋势</h2><h3 id="技术发展方向"><a href="#技术发展方向" class="headerlink" title="技术发展方向"></a>技术发展方向</h3><h4 id="1-硬件级安全"><a href="#1-硬件级安全" class="headerlink" title="1. 硬件级安全"></a>1. 硬件级安全</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 硬件级Root防护</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">hardware_root_protection_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">// 利用TrustZone技术</span></span><br><span class="line">    <span class="keyword">if</span> (enable_trustzone_protection() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 利用Secure Boot</span></span><br><span class="line">    <span class="keyword">if</span> (enable_secure_boot() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 利用硬件安全模块</span></span><br><span class="line">    <span class="keyword">if</span> (enable_hsm_protection() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-机器学习检测"><a href="#2-机器学习检测" class="headerlink" title="2. 机器学习检测"></a>2. 机器学习检测</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 机器学习Root检测</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MLRootDetector</span>:</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="variable language_">self</span>.model = <span class="variable language_">self</span>.load_model()</span><br><span class="line">        <span class="variable language_">self</span>.features = []</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">extract_features</span>(<span class="params">self, app_info</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;提取应用特征&quot;&quot;&quot;</span></span><br><span class="line">        features = &#123;</span><br><span class="line">            <span class="string">&#x27;permission_count&#x27;</span>: <span class="built_in">len</span>(app_info[<span class="string">&#x27;permissions&#x27;</span>]),</span><br><span class="line">            <span class="string">&#x27;suspicious_permissions&#x27;</span>: <span class="variable language_">self</span>.count_suspicious_permissions(app_info),</span><br><span class="line">            <span class="string">&#x27;network_usage&#x27;</span>: app_info[<span class="string">&#x27;network_usage&#x27;</span>],</span><br><span class="line">            <span class="string">&#x27;file_access_pattern&#x27;</span>: <span class="variable language_">self</span>.analyze_file_access(app_info),</span><br><span class="line">            <span class="string">&#x27;system_call_pattern&#x27;</span>: <span class="variable language_">self</span>.analyze_system_calls(app_info)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> features</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">predict_root_behavior</span>(<span class="params">self, features</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;预测Root行为&quot;&quot;&quot;</span></span><br><span class="line">        prediction = <span class="variable language_">self</span>.model.predict([features])</span><br><span class="line">        <span class="keyword">return</span> prediction[<span class="number">0</span>] &gt; <span class="number">0.5</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="安全建议"><a href="#安全建议" class="headerlink" title="安全建议"></a>安全建议</h3><h4 id="1-开发者建议"><a href="#1-开发者建议" class="headerlink" title="1. 开发者建议"></a>1. 开发者建议</h4><ul>
+<li><strong>最小权限原则</strong>：只请求必要的权限</li>
+<li><strong>代码混淆</strong>：使用代码混淆技术保护关键逻辑</li>
+<li><strong>完整性检查</strong>：定期检查应用完整性</li>
+<li><strong>运行时检测</strong>：实时检测Root环境</li>
+</ul>
+<h4 id="2-用户建议"><a href="#2-用户建议" class="headerlink" title="2. 用户建议"></a>2. 用户建议</h4><ul>
+<li><strong>谨慎Root</strong>：了解Root的风险和后果</li>
+<li><strong>选择可靠工具</strong>：使用经过验证的Root工具</li>
+<li><strong>定期更新</strong>：保持系统和Root工具的更新</li>
+<li><strong>备份数据</strong>：Root前备份重要数据</li>
+</ul>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>Android Root工具的发展反映了移动安全技术的不断演进。从早期的简单权限提升到现代的模块化设计，Root工具在功能性和安全性之间找到了更好的平衡。</p>
+<p><strong>本文关键点</strong>：</p>
+<ul>
+<li><strong>技术深度</strong>：从底层原理到实现细节的完整分析</li>
+<li><strong>对比分析</strong>：不同Root工具的技术特点和优劣势</li>
+<li><strong>安全防护</strong>：提供全面的检测和防护策略</li>
+</ul>
+<p><strong>学习建议</strong>：</p>
+<ul>
+<li>深入理解Linux内核和Android系统架构</li>
+<li>掌握系统调用和进程管理机制</li>
+<li>关注移动安全技术的最新发展</li>
+<li>遵守法律法规，仅用于安全研究</li>
+</ul>
+<hr>
+<p><em>关注我们，获取更多移动安全技术深度解析！</em><br><em>点赞、收藏、转发，让更多人受益！</em></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章推荐</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\13\article10_shamiko_analysis\" rel="bookmark">Magisk Root隐藏方案：Shamiko模块原理解析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\12\article9_android_root_tools_v2\" rel="bookmark">Android Root技术解析：从传统到现代的三种主流方案</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\15\article11_frida_hook\" rel="bookmark">Frida Hook技术入门：从零开始掌握动态分析神器</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\16\article12_objection_usage\" rel="bookmark">Objection使用指南：基于Frida的移动安全测试神器</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\18\article13_adb_commands\" rel="bookmark">ADB命令实战指南：Android调试桥的实用技巧</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div>持续输出技术分享，您的支持将鼓励我继续创作!</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wxpay.jpg" alt="果子 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="果子 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>果子
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://ihandmine.github.io/2025/08/15/article9_android_root_tools/" title="Android Root工具原理深度解析：从Magisk到KernelSU的技术演进">https://ihandmine.github.io/2025/08/15/article9_android_root_tools/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags" id="post-tags">
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+              <a href="/tags/Root/" rel="tag"><i class="fa fa-tag"></i> Root</a>
+              <a href="/tags/%E5%B7%A5%E5%85%B7%E5%8E%9F%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 工具原理</a>
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 深度解析</a>
+              <a href="/tags/%E4%BC%A0%E7%BB%9F/" rel="tag"><i class="fa fa-tag"></i> 传统</a>
+              <a href="/tags/%E7%8E%B0%E4%BB%A3/" rel="tag"><i class="fa fa-tag"></i> 现代</a>
+          </div>
+
+        <script type="text/javascript">
+        var tagsall=document.getElementsByClassName("post-tags")
+        for (var i = tagsall.length - 1; i >= 0; i--){
+            var tags=tagsall[i].getElementsByTagName("a");
+            for (var j = tags.length - 1; j >= 0; j--) {
+                var r=Math.floor(Math.random()*75+130);
+                var g=Math.floor(Math.random()*75+100);
+                var b=Math.floor(Math.random()*75+80);
+                tags[j].style.background = "rgb("+r+","+g+","+b+")";
+            }
+        }                        
+        </script>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/08/15/network_basics_article/" rel="prev" title="网络协议深度解析：从HTTP到QUIC的演进之路">
+      <i class="fa fa-chevron-left"></i> 网络协议深度解析：从HTTP到QUIC的演进之路
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/08/27/art001/" rel="next" title="OSI七层模型详解">
+      OSI七层模型详解 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Root%E5%B7%A5%E5%85%B7%E5%8F%91%E5%B1%95%E5%8E%86%E7%A8%8B"><span class="nav-number">1.</span> <span class="nav-text">Root工具发展历程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%86%E5%8F%B2%E6%BC%94%E8%BF%9B%E6%97%B6%E9%97%B4%E7%BA%BF"><span class="nav-number">1.1.</span> <span class="nav-text">历史演进时间线</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95%E7%89%B9%E7%82%B9"><span class="nav-number">1.2.</span> <span class="nav-text">技术发展特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%A0%E7%BB%9FRoot%E5%B7%A5%E5%85%B7%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">传统Root工具原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#SuperSU%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="nav-number">2.1.</span> <span class="nav-text">SuperSU技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%A0%B8%E5%BF%83%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.1.</span> <span class="nav-text">1. 核心架构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%9D%83%E9%99%90%E6%8F%90%E5%8D%87%E6%9C%BA%E5%88%B6"><span class="nav-number">2.1.2.</span> <span class="nav-text">2. 权限提升机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%AE%88%E6%8A%A4%E8%BF%9B%E7%A8%8B%E5%AE%9E%E7%8E%B0"><span class="nav-number">2.1.3.</span> <span class="nav-text">3. 守护进程实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KingRoot%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="nav-number">2.2.</span> <span class="nav-text">KingRoot技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E6%9C%BA%E5%88%B6"><span class="nav-number">2.2.1.</span> <span class="nav-text">1. 漏洞利用机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%A4%9A%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8%E7%AD%96%E7%95%A5"><span class="nav-number">2.2.2.</span> <span class="nav-text">2. 多漏洞利用策略</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%8E%B0%E4%BB%A3Root%E5%B7%A5%E5%85%B7%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">现代Root工具原理分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Magisk%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">Magisk技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E7%B3%BB%E7%BB%9F%E5%AE%8C%E6%95%B4%E6%80%A7%E4%BF%9D%E6%8A%A4"><span class="nav-number">3.1.1.</span> <span class="nav-text">1. 系统完整性保护</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0%E6%9C%BA%E5%88%B6"><span class="nav-number">3.1.2.</span> <span class="nav-text">2. 核心实现机制</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%A8%A1%E5%9D%97%E7%B3%BB%E7%BB%9F%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.1.3.</span> <span class="nav-text">3. 模块系统实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KernelSU%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="nav-number">3.2.</span> <span class="nav-text">KernelSU技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%86%85%E6%A0%B8%E7%BA%A7Root%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.2.1.</span> <span class="nav-text">1. 内核级Root实现</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%9D%83%E9%99%90%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6"><span class="nav-number">3.2.2.</span> <span class="nav-text">2. 权限管理机制</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#APatch%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="nav-number">3.3.</span> <span class="nav-text">APatch技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E7%8E%B0%E4%BB%A3%E5%8C%96Magisk%E6%9B%BF%E4%BB%A3%E5%93%81"><span class="nav-number">3.3.1.</span> <span class="nav-text">1. 现代化Magisk替代品</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%AE%89%E5%85%A8%E5%A2%9E%E5%BC%BA%E7%89%B9%E6%80%A7"><span class="nav-number">3.3.2.</span> <span class="nav-text">2. 安全增强特性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KernelSU%E5%88%86%E6%94%AF%E5%88%86%E6%9E%90"><span class="nav-number">3.4.</span> <span class="nav-text">KernelSU分支分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%AE%98%E6%96%B9KernelSU"><span class="nav-number">3.4.1.</span> <span class="nav-text">1. 官方KernelSU</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-KernelSU-Mod"><span class="nav-number">3.4.2.</span> <span class="nav-text">2. KernelSU-Mod</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-KernelSU-Android"><span class="nav-number">3.4.3.</span> <span class="nav-text">3. KernelSU-Android</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LineageOS-Superuser"><span class="nav-number">3.5.</span> <span class="nav-text">LineageOS Superuser</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%BC%80%E6%BA%90Root%E7%AE%A1%E7%90%86"><span class="nav-number">3.5.1.</span> <span class="nav-text">1. 开源Root管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E9%9B%86%E6%88%90%E7%89%B9%E6%80%A7"><span class="nav-number">3.5.2.</span> <span class="nav-text">2. 集成特性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B6%E4%BB%96Root%E5%B7%A5%E5%85%B7"><span class="nav-number">3.6.</span> <span class="nav-text">其他Root工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-CF-Auto-Root"><span class="nav-number">3.6.1.</span> <span class="nav-text">1. CF-Auto-Root</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-KingRoot"><span class="nav-number">3.6.2.</span> <span class="nav-text">2. KingRoot</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Root%E5%B7%A5%E5%85%B7%E6%8A%80%E6%9C%AF%E5%AF%B9%E6%AF%94"><span class="nav-number">4.</span> <span class="nav-text">Root工具技术对比</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84%E5%AF%B9%E6%AF%94"><span class="nav-number">4.1.</span> <span class="nav-text">技术架构对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%A6%E7%BB%86%E4%BC%98%E7%BC%BA%E7%82%B9%E5%88%86%E6%9E%90"><span class="nav-number">4.2.</span> <span class="nav-text">详细优缺点分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SuperSU"><span class="nav-number">4.2.1.</span> <span class="nav-text">SuperSU</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Magisk"><span class="nav-number">4.2.2.</span> <span class="nav-text">Magisk</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#APatch"><span class="nav-number">4.2.3.</span> <span class="nav-text">APatch</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KernelSU"><span class="nav-number">4.2.4.</span> <span class="nav-text">KernelSU</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#KernelSU-Mod"><span class="nav-number">4.2.5.</span> <span class="nav-text">KernelSU-Mod</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LineageOS-Superuser-1"><span class="nav-number">4.2.6.</span> <span class="nav-text">LineageOS Superuser</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94%E6%B5%8B%E8%AF%95"><span class="nav-number">4.3.</span> <span class="nav-text">性能对比测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E6%80%A7%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90"><span class="nav-number">4.4.</span> <span class="nav-text">安全性对比分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E6%8B%A9%E5%BB%BA%E8%AE%AE"><span class="nav-number">4.5.</span> <span class="nav-text">选择建议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E6%A0%B9%E6%8D%AE%E9%9C%80%E6%B1%82%E9%80%89%E6%8B%A9"><span class="nav-number">4.5.1.</span> <span class="nav-text">1. 根据需求选择</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%A0%B9%E6%8D%AE%E8%AE%BE%E5%A4%87%E9%80%89%E6%8B%A9"><span class="nav-number">4.5.2.</span> <span class="nav-text">2. 根据设备选择</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E6%A0%B9%E6%8D%AE%E7%94%A8%E9%80%94%E9%80%89%E6%8B%A9"><span class="nav-number">4.5.3.</span> <span class="nav-text">3. 根据用途选择</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Root%E6%A3%80%E6%B5%8B%E4%B8%8E%E9%98%B2%E6%8A%A4"><span class="nav-number">5.</span> <span class="nav-text">Root检测与防护</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Root%E6%A3%80%E6%B5%8B%E6%8A%80%E6%9C%AF"><span class="nav-number">5.1.</span> <span class="nav-text">Root检测技术</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E4%BC%A0%E7%BB%9F%E6%A3%80%E6%B5%8B%E6%96%B9%E6%B3%95"><span class="nav-number">5.1.1.</span> <span class="nav-text">1. 传统检测方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%8E%B0%E4%BB%A3%E6%A3%80%E6%B5%8B%E6%96%B9%E6%B3%95"><span class="nav-number">5.1.2.</span> <span class="nav-text">2. 现代检测方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Root%E9%98%B2%E6%8A%A4%E7%AD%96%E7%95%A5"><span class="nav-number">5.2.</span> <span class="nav-text">Root防护策略</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%BA%94%E7%94%A8%E7%BA%A7%E9%98%B2%E6%8A%A4"><span class="nav-number">5.2.1.</span> <span class="nav-text">1. 应用级防护</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%B3%BB%E7%BB%9F%E7%BA%A7%E9%98%B2%E6%8A%A4"><span class="nav-number">5.2.2.</span> <span class="nav-text">2. 系统级防护</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%AA%E6%9D%A5%E5%8F%91%E5%B1%95%E8%B6%8B%E5%8A%BF"><span class="nav-number">6.</span> <span class="nav-text">未来发展趋势</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E5%8F%91%E5%B1%95%E6%96%B9%E5%90%91"><span class="nav-number">6.1.</span> <span class="nav-text">技术发展方向</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E7%A1%AC%E4%BB%B6%E7%BA%A7%E5%AE%89%E5%85%A8"><span class="nav-number">6.1.1.</span> <span class="nav-text">1. 硬件级安全</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E6%A3%80%E6%B5%8B"><span class="nav-number">6.1.2.</span> <span class="nav-text">2. 机器学习检测</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E5%BB%BA%E8%AE%AE"><span class="nav-number">6.2.</span> <span class="nav-text">安全建议</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E5%BC%80%E5%8F%91%E8%80%85%E5%BB%BA%E8%AE%AE"><span class="nav-number">6.2.1.</span> <span class="nav-text">1. 开发者建议</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E7%94%A8%E6%88%B7%E5%BB%BA%E8%AE%AE"><span class="nav-number">6.2.2.</span> <span class="nav-text">2. 用户建议</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">7.</span> <span class="nav-text">结语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="果子"
+      src="/images/gzhavatar.jpg">
+  <p class="site-author-name" itemprop="name">果子</p>
+  <div class="site-description" itemprop="description">简单正直</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ihandmine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ihandmine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/handmine@outlook.com" title="E-Mail → handmine@outlook.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果子</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">221k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:21</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/tororo.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

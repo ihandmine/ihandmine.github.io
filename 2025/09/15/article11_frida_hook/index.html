@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/OIP.jpg">
+  <link rel="mask-icon" href="/images/OIP.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ihandmine.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Frida简介什么是FridaFrida是一个动态代码分析工具包，主要用于：  动态Hook应用程序 实时修改程序行为 分析应用程序逻辑 绕过安全检测  核心特点 跨平台：支持Windows、macOS、Linux、Android、iOS 多语言：支持JavaScript、Python、C等 易上手：简单的API设计，学习成本低 功能强大：可以Hook几乎所有系统调用和API">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Frida Hook技术入门：从零开始掌握动态分析神器">
+<meta property="og:url" content="https://ihandmine.github.io/2025/09/15/article11_frida_hook/index.html">
+<meta property="og:site_name" content="一枚酸心果子">
+<meta property="og:description" content="Frida简介什么是FridaFrida是一个动态代码分析工具包，主要用于：  动态Hook应用程序 实时修改程序行为 分析应用程序逻辑 绕过安全检测  核心特点 跨平台：支持Windows、macOS、Linux、Android、iOS 多语言：支持JavaScript、Python、C等 易上手：简单的API设计，学习成本低 功能强大：可以Hook几乎所有系统调用和API">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-15T07:24:44.000Z">
+<meta property="article:modified_time" content="2025-10-17T03:43:28.640Z">
+<meta property="article:author" content="果子">
+<meta property="article:tag" content="Frida">
+<meta property="article:tag" content="Hook">
+<meta property="article:tag" content="动态分析">
+<meta property="article:tag" content="技术入门">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://ihandmine.github.io/2025/09/15/article11_frida_hook/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Frida Hook技术入门：从零开始掌握动态分析神器 | 一枚酸心果子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一枚酸心果子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">果子果子果子果子果子~~~</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">21</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/ihandmine" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/09/15/article11_frida_hook/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Frida Hook技术入门：从零开始掌握动态分析神器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-15 15:24:44" itemprop="dateCreated datePublished" datetime="2025-09-15T15:24:44+08:00">2025-09-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:43:28" itemprop="dateModified" datetime="2025-10-17T11:43:28+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Frida简介"><a href="#Frida简介" class="headerlink" title="Frida简介"></a>Frida简介</h2><h3 id="什么是Frida"><a href="#什么是Frida" class="headerlink" title="什么是Frida"></a>什么是Frida</h3><p><strong>Frida</strong>是一个动态代码分析工具包，主要用于：</p>
+<ul>
+<li>动态Hook应用程序</li>
+<li>实时修改程序行为</li>
+<li>分析应用程序逻辑</li>
+<li>绕过安全检测</li>
+</ul>
+<h3 id="核心特点"><a href="#核心特点" class="headerlink" title="核心特点"></a>核心特点</h3><ul>
+<li><strong>跨平台</strong>：支持Windows、macOS、Linux、Android、iOS</li>
+<li><strong>多语言</strong>：支持JavaScript、Python、C等</li>
+<li><strong>易上手</strong>：简单的API设计，学习成本低</li>
+<li><strong>功能强大</strong>：可以Hook几乎所有系统调用和API</li>
+</ul>
+<span id="more"></span>
+<h2 id="Frida工作原理"><a href="#Frida工作原理" class="headerlink" title="Frida工作原理"></a>Frida工作原理</h2><h3 id="基本架构"><a href="#基本架构" class="headerlink" title="基本架构"></a>基本架构</h3><figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">目标应用 ←→ Frida <span class="built_in">Server</span> ←→ Frida <span class="built_in">Client</span> ←→ 你的脚本</span><br><span class="line">    ↓</span><br><span class="line">注入进程 → Hook函数 → 修改行为 → 返回结果</span><br></pre></td></tr></table></figure>
+
+<h3 id="Hook机制"><a href="#Hook机制" class="headerlink" title="Hook机制"></a>Hook机制</h3><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">1.</span> 注入Frida Agent到目标进程</span><br><span class="line"><span class="bullet">2.</span> 定位目标函数地址</span><br><span class="line"><span class="bullet">3.</span> 替换函数入口点</span><br><span class="line"><span class="bullet">4.</span> 执行自定义逻辑</span><br><span class="line"><span class="bullet">5.</span> 调用原函数或返回自定义值</span><br></pre></td></tr></table></figure>
+
+<h2 id="Frida安装配置"><a href="#Frida安装配置" class="headerlink" title="Frida安装配置"></a>Frida安装配置</h2><h3 id="1-安装Frida"><a href="#1-安装Frida" class="headerlink" title="1. 安装Frida"></a>1. 安装Frida</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装Frida客户端</span></span><br><span class="line">pip install frida-tools</span><br><span class="line"></span><br><span class="line"><span class="comment"># 验证安装</span></span><br><span class="line">frida --version</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Android环境配置"><a href="#2-Android环境配置" class="headerlink" title="2. Android环境配置"></a>2. Android环境配置</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 下载Frida Server</span></span><br><span class="line"><span class="comment"># 从 https://github.com/frida/frida/releases 下载对应版本</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 推送到设备</span></span><br><span class="line">adb push frida-server /data/local/tmp/</span><br><span class="line">adb shell <span class="built_in">chmod</span> 755 /data/local/tmp/frida-server</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动Frida Server</span></span><br><span class="line">adb shell /data/local/tmp/frida-server &amp;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-连接设备"><a href="#3-连接设备" class="headerlink" title="3. 连接设备"></a>3. 连接设备</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> frida</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接设备</span></span><br><span class="line">device = frida.get_usb_device()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;设备: <span class="subst">&#123;device&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出进程</span></span><br><span class="line">processes = device.enumerate_processes()</span><br><span class="line"><span class="keyword">for</span> process <span class="keyword">in</span> processes:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;进程: <span class="subst">&#123;process.name&#125;</span> (PID: <span class="subst">&#123;process.pid&#125;</span>)&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="基础Hook示例"><a href="#基础Hook示例" class="headerlink" title="基础Hook示例"></a>基础Hook示例</h2><h3 id="1-Hook-Java方法"><a href="#1-Hook-Java方法" class="headerlink" title="1. Hook Java方法"></a>1. Hook Java方法</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Hook Java方法示例</span></span><br><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// Hook String类的equals方法</span></span><br><span class="line">    <span class="keyword">var</span> <span class="title class_">String</span> = <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;java.lang.String&quot;</span>);</span><br><span class="line">    <span class="title class_">String</span>.<span class="property">equals</span>.<span class="property">implementation</span> = <span class="keyword">function</span>(<span class="params">obj</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;String.equals被调用&quot;</span>);</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;参数: &quot;</span> + obj);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 调用原方法</span></span><br><span class="line">        <span class="keyword">var</span> result = <span class="variable language_">this</span>.<span class="title function_">equals</span>(obj);</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;返回值: &quot;</span> + result);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-Hook-Native函数"><a href="#2-Hook-Native函数" class="headerlink" title="2. Hook Native函数"></a>2. Hook Native函数</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Hook Native函数示例</span></span><br><span class="line"><span class="keyword">var</span> libc = <span class="title class_">Module</span>.<span class="title function_">findExportByName</span>(<span class="string">&quot;libc.so&quot;</span>, <span class="string">&quot;strlen&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (libc) &#123;</span><br><span class="line">    <span class="title class_">Interceptor</span>.<span class="title function_">attach</span>(libc, &#123;</span><br><span class="line">        <span class="attr">onEnter</span>: <span class="keyword">function</span>(<span class="params">args</span>) &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;strlen被调用&quot;</span>);</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;参数: &quot;</span> + <span class="title class_">Memory</span>.<span class="title function_">readUtf8String</span>(args[<span class="number">0</span>]));</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">onLeave</span>: <span class="keyword">function</span>(<span class="params">retval</span>) &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;返回值: &quot;</span> + retval);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Hook系统调用"><a href="#3-Hook系统调用" class="headerlink" title="3. Hook系统调用"></a>3. Hook系统调用</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Hook系统调用示例</span></span><br><span class="line"><span class="keyword">var</span> openat = <span class="title class_">Module</span>.<span class="title function_">findExportByName</span>(<span class="string">&quot;libc.so&quot;</span>, <span class="string">&quot;openat&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (openat) &#123;</span><br><span class="line">    <span class="title class_">Interceptor</span>.<span class="title function_">attach</span>(openat, &#123;</span><br><span class="line">        <span class="attr">onEnter</span>: <span class="keyword">function</span>(<span class="params">args</span>) &#123;</span><br><span class="line">            <span class="keyword">var</span> path = <span class="title class_">Memory</span>.<span class="title function_">readUtf8String</span>(args[<span class="number">1</span>]);</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;打开文件: &quot;</span> + path);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 隐藏特定文件</span></span><br><span class="line">            <span class="keyword">if</span> (path.<span class="title function_">includes</span>(<span class="string">&quot;su&quot;</span>)) &#123;</span><br><span class="line">                <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;隐藏su文件访问&quot;</span>);</span><br><span class="line">                args[<span class="number">1</span>] = <span class="title class_">Memory</span>.<span class="title function_">allocUtf8String</span>(<span class="string">&quot;/dev/null&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="实用Hook技巧"><a href="#实用Hook技巧" class="headerlink" title="实用Hook技巧"></a>实用Hook技巧</h2><h3 id="1-绕过Root检测"><a href="#1-绕过Root检测" class="headerlink" title="1. 绕过Root检测"></a>1. 绕过Root检测</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 绕过Root检测</span></span><br><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// Hook文件存在检查</span></span><br><span class="line">    <span class="keyword">var</span> <span class="title class_">File</span> = <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;java.io.File&quot;</span>);</span><br><span class="line">    <span class="title class_">File</span>.<span class="property">exists</span>.<span class="property">implementation</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> path = <span class="variable language_">this</span>.<span class="title function_">getAbsolutePath</span>();</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;检查文件: &quot;</span> + path);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 隐藏Root相关文件</span></span><br><span class="line">        <span class="keyword">if</span> (path.<span class="title function_">includes</span>(<span class="string">&quot;su&quot;</span>) || path.<span class="title function_">includes</span>(<span class="string">&quot;magisk&quot;</span>)) &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;隐藏Root文件: &quot;</span> + path);</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">exists</span>();</span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook系统属性获取</span></span><br><span class="line">    <span class="keyword">var</span> <span class="title class_">SystemProperties</span> = <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;android.os.SystemProperties&quot;</span>);</span><br><span class="line">    <span class="title class_">SystemProperties</span>.<span class="property">get</span>.<span class="title function_">overload</span>(<span class="string">&quot;java.lang.String&quot;</span>, <span class="string">&quot;java.lang.String&quot;</span>).<span class="property">implementation</span> = <span class="keyword">function</span>(<span class="params">key, def</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;获取属性: &quot;</span> + key);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 伪造Root相关属性</span></span><br><span class="line">        <span class="keyword">if</span> (key === <span class="string">&quot;ro.debuggable&quot;</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;0&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (key === <span class="string">&quot;ro.secure&quot;</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="string">&quot;1&quot;</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">get</span>(key, def);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-绕过SSL-Pinning"><a href="#2-绕过SSL-Pinning" class="headerlink" title="2. 绕过SSL Pinning"></a>2. 绕过SSL Pinning</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 绕过SSL Pinning</span></span><br><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// Hook X509TrustManager</span></span><br><span class="line">    <span class="keyword">var</span> X509TrustManager = <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;javax.net.ssl.X509TrustManager&quot;</span>);</span><br><span class="line">    X509TrustManager.<span class="property">checkClientTrusted</span>.<span class="property">implementation</span> = <span class="keyword">function</span>(<span class="params">chain, authType</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;绕过客户端证书检查&quot;</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    X509TrustManager.<span class="property">checkServerTrusted</span>.<span class="property">implementation</span> = <span class="keyword">function</span>(<span class="params">chain, authType</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;绕过服务端证书检查&quot;</span>);</span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    X509TrustManager.<span class="property">getAcceptedIssuers</span>.<span class="property">implementation</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;java.util.ArrayList&quot;</span>).$new();</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-监控网络请求"><a href="#3-监控网络请求" class="headerlink" title="3. 监控网络请求"></a>3. 监控网络请求</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 监控网络请求</span></span><br><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// Hook OkHttp</span></span><br><span class="line">    <span class="keyword">var</span> <span class="title class_">OkHttpClient</span> = <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;okhttp3.OkHttpClient&quot;</span>);</span><br><span class="line">    <span class="keyword">var</span> <span class="title class_">Request</span> = <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;okhttp3.Request&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook Request.Builder</span></span><br><span class="line">    <span class="keyword">var</span> <span class="title class_">RequestBuilder</span> = <span class="title class_">Java</span>.<span class="title function_">use</span>(<span class="string">&quot;okhttp3.Request$Builder&quot;</span>);</span><br><span class="line">    <span class="title class_">RequestBuilder</span>.<span class="property">build</span>.<span class="property">implementation</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">var</span> request = <span class="variable language_">this</span>.<span class="title function_">build</span>();</span><br><span class="line">        <span class="keyword">var</span> url = request.<span class="title function_">url</span>().<span class="title function_">toString</span>();</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;HTTP请求: &quot;</span> + url);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> request;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="进阶Hook技术"><a href="#进阶Hook技术" class="headerlink" title="进阶Hook技术"></a>进阶Hook技术</h2><h3 id="1-动态类加载"><a href="#1-动态类加载" class="headerlink" title="1. 动态类加载"></a>1. 动态类加载</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 动态类加载</span></span><br><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// 等待类加载</span></span><br><span class="line">    <span class="title class_">Java</span>.<span class="title function_">choose</span>(<span class="string">&quot;com.example.TargetClass&quot;</span>, &#123;</span><br><span class="line">        <span class="attr">onMatch</span>: <span class="keyword">function</span>(<span class="params">instance</span>) &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;找到目标实例: &quot;</span> + instance);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// Hook实例方法</span></span><br><span class="line">            instance.<span class="property">targetMethod</span>.<span class="property">implementation</span> = <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">                <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;目标方法被调用&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="title function_">targetMethod</span>();</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">onComplete</span>: <span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;搜索完成&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-内存操作"><a href="#2-内存操作" class="headerlink" title="2. 内存操作"></a>2. 内存操作</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 内存操作</span></span><br><span class="line"><span class="title class_">Java</span>.<span class="title function_">perform</span>(<span class="keyword">function</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="comment">// 读取内存</span></span><br><span class="line">    <span class="keyword">var</span> baseAddr = <span class="title class_">Module</span>.<span class="title function_">getBaseAddress</span>(<span class="string">&quot;libtarget.so&quot;</span>);</span><br><span class="line">    <span class="keyword">var</span> value = <span class="title class_">Memory</span>.<span class="title function_">readU32</span>(baseAddr.<span class="title function_">add</span>(<span class="number">0x1000</span>));</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;内存值: &quot;</span> + value);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 写入内存</span></span><br><span class="line">    <span class="title class_">Memory</span>.<span class="title function_">writeU32</span>(baseAddr.<span class="title function_">add</span>(<span class="number">0x1000</span>), <span class="number">0x12345678</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 分配内存</span></span><br><span class="line">    <span class="keyword">var</span> buffer = <span class="title class_">Memory</span>.<span class="title function_">alloc</span>(<span class="number">1024</span>);</span><br><span class="line">    <span class="title class_">Memory</span>.<span class="title function_">writeUtf8String</span>(buffer, <span class="string">&quot;Hello Frida&quot;</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-函数替换"><a href="#3-函数替换" class="headerlink" title="3. 函数替换"></a>3. 函数替换</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 函数替换</span></span><br><span class="line"><span class="keyword">var</span> targetFunc = <span class="title class_">Module</span>.<span class="title function_">findExportByName</span>(<span class="string">&quot;libtarget.so&quot;</span>, <span class="string">&quot;target_function&quot;</span>);</span><br><span class="line"><span class="keyword">if</span> (targetFunc) &#123;</span><br><span class="line">    <span class="title class_">Interceptor</span>.<span class="title function_">replace</span>(targetFunc, <span class="keyword">new</span> <span class="title class_">NativeCallback</span>(<span class="keyword">function</span>(<span class="params">arg1, arg2</span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;替换函数被调用&quot;</span>);</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;参数1: &quot;</span> + arg1);</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;参数2: &quot;</span> + arg2);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 返回自定义值</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0x12345678</span>;</span><br><span class="line">    &#125;, <span class="string">&#x27;int&#x27;</span>, [<span class="string">&#x27;int&#x27;</span>, <span class="string">&#x27;int&#x27;</span>]));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><h3 id="1-基础命令"><a href="#1-基础命令" class="headerlink" title="1. 基础命令"></a>1. 基础命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 列出设备</span></span><br><span class="line">frida-ls-devices</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出进程</span></span><br><span class="line">frida-ps -U</span><br><span class="line"></span><br><span class="line"><span class="comment"># 附加进程</span></span><br><span class="line">frida -U -f com.example.app -l script.js</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动应用</span></span><br><span class="line">frida -U -f com.example.app -l script.js --no-pause</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-高级命令"><a href="#2-高级命令" class="headerlink" title="2. 高级命令"></a>2. 高级命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生成Hook模板</span></span><br><span class="line">frida-trace -U -i <span class="string">&quot;*open*&quot;</span> com.example.app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 监控系统调用</span></span><br><span class="line">frida-trace -U -j <span class="string">&quot;*&quot;</span> com.example.app</span><br><span class="line"></span><br><span class="line"><span class="comment"># 导出函数</span></span><br><span class="line">frida -U com.example.app -e <span class="string">&quot;console.log(Module.enumerateExports(&#x27;libc.so&#x27;))&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>这篇文章主要是讲解了官方版本的Frida，另外还有一些第三方魔改的基于一定特性修改的版本这里就不展开了，有兴趣的可以自行去翻阅一下，或者后面讲一篇关于自定义自己的frida该怎么做。</p>
+<p><strong>本文关键要点</strong>：</p>
+<ul>
+<li><strong>基本原理</strong>：进程注入 + 函数Hook</li>
+<li><strong>核心功能</strong>：动态修改程序行为</li>
+<li><strong>应用场景</strong>：安全研究、逆向分析、漏洞挖掘</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章推荐</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\10\15\article18_frida_detection_bypass\" rel="bookmark">Frida特征检测及对应的绕过技术解析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\16\article12_objection_usage\" rel="bookmark">Objection使用指南：基于Frida的移动安全测试神器</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\18\article13_adb_commands\" rel="bookmark">ADB命令实战指南：Android调试桥的实用技巧</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\26\article16_unidbg_introduction\" rel="bookmark">Unidbg入门指南：Android Native代码模拟利器</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div>持续输出技术分享，您的支持将鼓励我继续创作!</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wxpay.jpg" alt="果子 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="果子 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>果子
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://ihandmine.github.io/2025/09/15/article11_frida_hook/" title="Frida Hook技术入门：从零开始掌握动态分析神器">https://ihandmine.github.io/2025/09/15/article11_frida_hook/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags" id="post-tags">
+              <a href="/tags/Frida/" rel="tag"><i class="fa fa-tag"></i> Frida</a>
+              <a href="/tags/Hook/" rel="tag"><i class="fa fa-tag"></i> Hook</a>
+              <a href="/tags/%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 动态分析</a>
+              <a href="/tags/%E6%8A%80%E6%9C%AF%E5%85%A5%E9%97%A8/" rel="tag"><i class="fa fa-tag"></i> 技术入门</a>
+          </div>
+
+        <script type="text/javascript">
+        var tagsall=document.getElementsByClassName("post-tags")
+        for (var i = tagsall.length - 1; i >= 0; i--){
+            var tags=tagsall[i].getElementsByTagName("a");
+            for (var j = tags.length - 1; j >= 0; j--) {
+                var r=Math.floor(Math.random()*75+130);
+                var g=Math.floor(Math.random()*75+100);
+                var b=Math.floor(Math.random()*75+80);
+                tags[j].style.background = "rgb("+r+","+g+","+b+")";
+            }
+        }                        
+        </script>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/09/13/article10_shamiko_analysis/" rel="prev" title="Magisk Root隐藏方案：Shamiko模块原理解析">
+      <i class="fa fa-chevron-left"></i> Magisk Root隐藏方案：Shamiko模块原理解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/09/16/article12_objection_usage/" rel="next" title="Objection使用指南：基于Frida的移动安全测试神器">
+      Objection使用指南：基于Frida的移动安全测试神器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Frida%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">Frida简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFFrida"><span class="nav-number">1.1.</span> <span class="nav-text">什么是Frida</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%89%B9%E7%82%B9"><span class="nav-number">1.2.</span> <span class="nav-text">核心特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Frida%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="nav-number">2.</span> <span class="nav-text">Frida工作原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E6%9E%B6%E6%9E%84"><span class="nav-number">2.1.</span> <span class="nav-text">基本架构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hook%E6%9C%BA%E5%88%B6"><span class="nav-number">2.2.</span> <span class="nav-text">Hook机制</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Frida%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE"><span class="nav-number">3.</span> <span class="nav-text">Frida安装配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%AE%89%E8%A3%85Frida"><span class="nav-number">3.1.</span> <span class="nav-text">1. 安装Frida</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Android%E7%8E%AF%E5%A2%83%E9%85%8D%E7%BD%AE"><span class="nav-number">3.2.</span> <span class="nav-text">2. Android环境配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E8%BF%9E%E6%8E%A5%E8%AE%BE%E5%A4%87"><span class="nav-number">3.3.</span> <span class="nav-text">3. 连接设备</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80Hook%E7%A4%BA%E4%BE%8B"><span class="nav-number">4.</span> <span class="nav-text">基础Hook示例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Hook-Java%E6%96%B9%E6%B3%95"><span class="nav-number">4.1.</span> <span class="nav-text">1. Hook Java方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-Hook-Native%E5%87%BD%E6%95%B0"><span class="nav-number">4.2.</span> <span class="nav-text">2. Hook Native函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Hook%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="nav-number">4.3.</span> <span class="nav-text">3. Hook系统调用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%94%A8Hook%E6%8A%80%E5%B7%A7"><span class="nav-number">5.</span> <span class="nav-text">实用Hook技巧</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E7%BB%95%E8%BF%87Root%E6%A3%80%E6%B5%8B"><span class="nav-number">5.1.</span> <span class="nav-text">1. 绕过Root检测</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%BB%95%E8%BF%87SSL-Pinning"><span class="nav-number">5.2.</span> <span class="nav-text">2. 绕过SSL Pinning</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E7%9B%91%E6%8E%A7%E7%BD%91%E7%BB%9C%E8%AF%B7%E6%B1%82"><span class="nav-number">5.3.</span> <span class="nav-text">3. 监控网络请求</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E9%98%B6Hook%E6%8A%80%E6%9C%AF"><span class="nav-number">6.</span> <span class="nav-text">进阶Hook技术</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%8A%A8%E6%80%81%E7%B1%BB%E5%8A%A0%E8%BD%BD"><span class="nav-number">6.1.</span> <span class="nav-text">1. 动态类加载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%86%85%E5%AD%98%E6%93%8D%E4%BD%9C"><span class="nav-number">6.2.</span> <span class="nav-text">2. 内存操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%87%BD%E6%95%B0%E6%9B%BF%E6%8D%A2"><span class="nav-number">6.3.</span> <span class="nav-text">3. 函数替换</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">7.</span> <span class="nav-text">常用命令</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%9F%BA%E7%A1%80%E5%91%BD%E4%BB%A4"><span class="nav-number">7.1.</span> <span class="nav-text">1. 基础命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E9%AB%98%E7%BA%A7%E5%91%BD%E4%BB%A4"><span class="nav-number">7.2.</span> <span class="nav-text">2. 高级命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">8.</span> <span class="nav-text">结语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="果子"
+      src="/images/gzhavatar.jpg">
+  <p class="site-author-name" itemprop="name">果子</p>
+  <div class="site-description" itemprop="description">简单正直</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ihandmine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ihandmine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/handmine@outlook.com" title="E-Mail → handmine@outlook.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果子</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">221k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:21</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/tororo.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

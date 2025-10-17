@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/OIP.jpg">
+  <link rel="mask-icon" href="/images/OIP.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ihandmine.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Shamiko模块概述模块基本信息开发团队：LSPosed团队技术基础：基于Zygisk框架主要功能：绕过各种Root检测 核心特性 绕过SafetyNet检测 绕过银行APP检测 绕过游戏反作弊检测 支持多种检测方法绕过 基于Zygisk框架实现">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Magisk Root隐藏方案：Shamiko模块原理解析">
+<meta property="og:url" content="https://ihandmine.github.io/2025/09/13/article10_shamiko_analysis/index.html">
+<meta property="og:site_name" content="一枚酸心果子">
+<meta property="og:description" content="Shamiko模块概述模块基本信息开发团队：LSPosed团队技术基础：基于Zygisk框架主要功能：绕过各种Root检测 核心特性 绕过SafetyNet检测 绕过银行APP检测 绕过游戏反作弊检测 支持多种检测方法绕过 基于Zygisk框架实现">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://ihandmine.github.io/image-1.png">
+<meta property="og:image" content="https://ihandmine.github.io/image.png">
+<meta property="article:published_time" content="2025-09-13T07:24:44.000Z">
+<meta property="article:modified_time" content="2025-10-17T03:41:33.314Z">
+<meta property="article:author" content="果子">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="Root">
+<meta property="article:tag" content="隐藏方案">
+<meta property="article:tag" content="Shamiko模块">
+<meta property="article:tag" content="原理解析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://ihandmine.github.io/image-1.png">
+
+<link rel="canonical" href="https://ihandmine.github.io/2025/09/13/article10_shamiko_analysis/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Magisk Root隐藏方案：Shamiko模块原理解析 | 一枚酸心果子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一枚酸心果子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">果子果子果子果子果子~~~</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">21</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/ihandmine" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/09/13/article10_shamiko_analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Magisk Root隐藏方案：Shamiko模块原理解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-13 15:24:44" itemprop="dateCreated datePublished" datetime="2025-09-13T15:24:44+08:00">2025-09-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:41:33" itemprop="dateModified" datetime="2025-10-17T11:41:33+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/Magisk%E6%A8%A1%E5%9D%97/" itemprop="url" rel="index"><span itemprop="name">Magisk模块</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>12k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Shamiko模块概述"><a href="#Shamiko模块概述" class="headerlink" title="Shamiko模块概述"></a>Shamiko模块概述</h2><h3 id="模块基本信息"><a href="#模块基本信息" class="headerlink" title="模块基本信息"></a>模块基本信息</h3><p><strong>开发团队</strong>：LSPosed团队<br><strong>技术基础</strong>：基于Zygisk框架<br><strong>主要功能</strong>：绕过各种Root检测</p>
+<h3 id="核心特性"><a href="#核心特性" class="headerlink" title="核心特性"></a>核心特性</h3><ul>
+<li>绕过SafetyNet检测</li>
+<li>绕过银行APP检测</li>
+<li>绕过游戏反作弊检测</li>
+<li>支持多种检测方法绕过</li>
+<li>基于Zygisk框架实现</li>
+</ul>
+<span id="more"></span>
+<h2 id="Shamiko安装方法："><a href="#Shamiko安装方法：" class="headerlink" title="Shamiko安装方法："></a>Shamiko安装方法：</h2><h3 id="1-下载Shamiko模块"><a href="#1-下载Shamiko模块" class="headerlink" title="1. 下载Shamiko模块"></a>1. 下载Shamiko模块</h3><ul>
+<li>github地址：<a target="_blank" rel="noopener" href="https://github.com/LSPosed/Shamiko">https://github.com/LSPosed/Shamiko</a></li>
+<li>从LSPosed团队官方渠道下载最新版本的Shamiko模块。</li>
+</ul>
+<h3 id="2-安装Shamiko模块-地址：https-magiskcn-com-shamiko-install-html"><a href="#2-安装Shamiko模块-地址：https-magiskcn-com-shamiko-install-html" class="headerlink" title="2. 安装Shamiko模块 地址：https://magiskcn.com/shamiko-install.html"></a>2. 安装Shamiko模块 地址：<a target="_blank" rel="noopener" href="https://magiskcn.com/shamiko-install.html">https://magiskcn.com/shamiko-install.html</a></h3><ul>
+<li>打开Magisk Manager应用。</li>
+<li>打开 Magisk – 设置 – 开启 Zygisk</li>
+<li>模块 – 从本地安装</li>
+<li><img src="/image-1.png" alt="alt text"></li>
+<li>选择下载的Shamiko模块文件。</li>
+<li>安装好 Shamiko 模块，选择隐藏模式（推荐白名单模式）</li>
+</ul>
+<h3 id="3-推荐使用白名单模式-地址：https-magiskcn-com-shamiko-whitelist-html"><a href="#3-推荐使用白名单模式-地址：https-magiskcn-com-shamiko-whitelist-html" class="headerlink" title="3. 推荐使用白名单模式 地址：https://magiskcn.com/shamiko-whitelist.html"></a>3. 推荐使用白名单模式 地址：<a target="_blank" rel="noopener" href="https://magiskcn.com/shamiko-whitelist.html">https://magiskcn.com/shamiko-whitelist.html</a></h3><ul>
+<li>打开目录 &#x2F;data&#x2F;adb&#x2F;shamiko （推荐使用MT管理器）</li>
+<li>创建 whitelist 文件（是文件，不是文件夹。不要搞错了哦）</li>
+<li>重启手机，确认已切换成功<br><img src="/image.png" alt="alt text"></li>
+</ul>
+<h2 id="Shamiko技术原理"><a href="#Shamiko技术原理" class="headerlink" title="Shamiko技术原理"></a>Shamiko技术原理</h2><h3 id="核心隐藏机制"><a href="#核心隐藏机制" class="headerlink" title="核心隐藏机制"></a>核心隐藏机制</h3><figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">应用检测<span class="built_in">Root</span> → <span class="variable">Shamiko</span>拦截 → 伪造系统信息 → 返回正常结果</span><br><span class="line">    ↓</span><br><span class="line">检测<span class="variable">su</span>命令 → 隐藏<span class="variable">su</span>文件 → 返回不存在</span><br><span class="line">    ↓</span><br><span class="line">检测<span class="built_in">Root</span>属性 → 伪造属性值 → 返回正常值</span><br><span class="line">    ↓</span><br><span class="line">检测<span class="built_in">Root</span>进程 → 隐藏进程信息 → 返回空列表</span><br></pre></td></tr></table></figure>
+
+<h3 id="技术架构"><a href="#技术架构" class="headerlink" title="技术架构"></a>技术架构</h3><figure class="highlight mathematica"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">Zygote</span>进程启动 → 加载<span class="variable">Shamiko</span>模块 → <span class="variable">Hook</span>系统调用 → 隐藏<span class="built_in">Root</span>特征</span><br><span class="line">    ↓</span><br><span class="line">应用进程启动 → 继承<span class="variable">Shamiko</span> <span class="variable">Hook</span> → 自动隐藏<span class="built_in">Root</span> → 绕过检测</span><br><span class="line">    ↓</span><br><span class="line"><span class="variable">API</span>调用拦截 → 伪造返回值 → 应用无法检测到<span class="built_in">Root</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Shamiko核心实现"><a href="#Shamiko核心实现" class="headerlink" title="Shamiko核心实现"></a>Shamiko核心实现</h2><h3 id="1-模块初始化"><a href="#1-模块初始化" class="headerlink" title="1. 模块初始化"></a>1. 模块初始化</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Shamiko模块初始化</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">shamiko_init</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 初始化Shamiko环境</span></span><br><span class="line">    <span class="keyword">if</span> (init_shamiko_env() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 注册系统调用Hook</span></span><br><span class="line">    <span class="keyword">if</span> (register_syscall_hooks() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启用API Hook</span></span><br><span class="line">    <span class="keyword">if</span> (enable_api_hooks() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 启用属性伪造</span></span><br><span class="line">    <span class="keyword">if</span> (enable_prop_fake() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 初始化Shamiko环境</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">init_shamiko_env</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// 创建Shamiko工作目录</span></span><br><span class="line">    mkdir(<span class="string">&quot;/data/adb/shamiko&quot;</span>, <span class="number">0755</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 加载配置文件</span></span><br><span class="line">    <span class="keyword">if</span> (load_shamiko_config() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 初始化隐藏规则</span></span><br><span class="line">    <span class="keyword">if</span> (init_hide_rules() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-系统调用Hook"><a href="#2-系统调用Hook" class="headerlink" title="2. 系统调用Hook"></a>2. 系统调用Hook</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册系统调用Hook</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">register_syscall_hooks</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// Hook文件系统相关系统调用</span></span><br><span class="line">    hook_syscall(__NR_openat, shamiko_openat);</span><br><span class="line">    hook_syscall(__NR_faccessat, shamiko_faccessat);</span><br><span class="line">    hook_syscall(__NR_stat, shamiko_stat);</span><br><span class="line">    hook_syscall(__NR_newfstatat, shamiko_newfstatat);</span><br><span class="line">    hook_syscall(__NR_readlinkat, shamiko_readlinkat);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook进程相关系统调用</span></span><br><span class="line">    hook_syscall(__NR_kill, shamiko_kill);</span><br><span class="line">    hook_syscall(__NR_tgkill, shamiko_tgkill);</span><br><span class="line">    hook_syscall(__NR_tkill, shamiko_tkill);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook属性相关系统调用</span></span><br><span class="line">    hook_syscall(__NR_getprop, shamiko_getprop);</span><br><span class="line">    hook_syscall(__NR_setprop, shamiko_setprop);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-文件系统隐藏"><a href="#3-文件系统隐藏" class="headerlink" title="3. 文件系统隐藏"></a>3. 文件系统隐藏</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Shamiko文件系统隐藏实现</span></span><br><span class="line"><span class="type">long</span> <span class="title function_">shamiko_openat</span><span class="params">(<span class="keyword">struct</span> pt_regs *regs)</span> &#123;</span><br><span class="line">    <span class="type">int</span> dirfd = regs-&gt;di;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *pathname = (<span class="type">const</span> <span class="type">char</span> *)regs-&gt;si;</span><br><span class="line">    <span class="type">int</span> flags = regs-&gt;dx;</span><br><span class="line">    <span class="type">mode_t</span> mode = regs-&gt;r10;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查是否为Root相关文件</span></span><br><span class="line">    <span class="keyword">if</span> (is_root_file(pathname)) &#123;</span><br><span class="line">        <span class="comment">// 返回文件不存在</span></span><br><span class="line">        regs-&gt;ax = -ENOENT;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查是否为su命令</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strstr</span>(pathname, <span class="string">&quot;su&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="comment">// 重定向到不存在的文件</span></span><br><span class="line">        regs-&gt;ax = -ENOENT;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查是否为Magisk相关文件</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strstr</span>(pathname, <span class="string">&quot;magisk&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="comment">// 重定向到不存在的文件</span></span><br><span class="line">        regs-&gt;ax = -ENOENT;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 正常文件访问</span></span><br><span class="line">    <span class="keyword">return</span> original_openat(regs);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断是否为Root相关文件</span></span><br><span class="line"><span class="type">bool</span> <span class="title function_">is_root_file</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *pathname)</span> &#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *root_files[] = &#123;</span><br><span class="line">        <span class="string">&quot;/system/app/Superuser.apk&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/sbin/su&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/bin/su&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/xbin/su&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/data/local/xbin/su&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/data/local/bin/su&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/etc/init.d/99SuperSUDaemon&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/dev/com.koushikdutta.superuser.daemon/&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/app/Kinguser.apk&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/app/KingRoot.apk&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/app/360Root.apk&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/data/local/tmp/su&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/data/local/tmp/daemonsu&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/bin/.ext/.su&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/usr/we-need-root/su-backup&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/xbin/busybox&quot;</span>,</span><br><span class="line">        <span class="string">&quot;/system/bin/busybox&quot;</span></span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="keyword">sizeof</span>(root_files)/<span class="keyword">sizeof</span>(root_files[<span class="number">0</span>]); i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">strcmp</span>(pathname, root_files[i]) == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查路径模式</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strstr</span>(pathname, <span class="string">&quot;su&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strstr</span>(pathname, <span class="string">&quot;magisk&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strstr</span>(pathname, <span class="string">&quot;superuser&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-系统属性伪造"><a href="#4-系统属性伪造" class="headerlink" title="4. 系统属性伪造"></a>4. 系统属性伪造</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Shamiko系统属性伪造实现</span></span><br><span class="line"><span class="type">long</span> <span class="title function_">shamiko_getprop</span><span class="params">(<span class="keyword">struct</span> pt_regs *regs)</span> &#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *name = (<span class="type">const</span> <span class="type">char</span> *)regs-&gt;di;</span><br><span class="line">    <span class="type">char</span> *value = (<span class="type">char</span> *)regs-&gt;si;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *default_value = (<span class="type">const</span> <span class="type">char</span> *)regs-&gt;dx;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查是否为Root相关属性</span></span><br><span class="line">    <span class="keyword">if</span> (is_root_prop(name)) &#123;</span><br><span class="line">        <span class="comment">// 返回伪造的属性值</span></span><br><span class="line">        <span class="built_in">strcpy</span>(value, get_fake_prop_value(name));</span><br><span class="line">        regs-&gt;ax = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 正常属性获取</span></span><br><span class="line">    <span class="keyword">return</span> original_getprop(regs);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断是否为Root相关属性</span></span><br><span class="line"><span class="type">bool</span> <span class="title function_">is_root_prop</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name)</span> &#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *root_props[] = &#123;</span><br><span class="line">        <span class="string">&quot;ro.debuggable&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.secure&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.build.selinux&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.magisk.version&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.boot.magisk&quot;</span>,</span><br><span class="line">        <span class="string">&quot;persist.magisk.version&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.zygisk.version&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.boot.zygisk&quot;</span>,</span><br><span class="line">        <span class="string">&quot;persist.zygisk.version&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.build.tags&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.build.type&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.kernel.qemu&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.hardware&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.product.cpu.abi&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.product.cpu.abilist&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.product.cpu.abilist32&quot;</span>,</span><br><span class="line">        <span class="string">&quot;ro.product.cpu.abilist64&quot;</span></span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="keyword">sizeof</span>(root_props)/<span class="keyword">sizeof</span>(root_props[<span class="number">0</span>]); i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, root_props[i]) == <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查属性名模式</span></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strstr</span>(name, <span class="string">&quot;magisk&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strstr</span>(name, <span class="string">&quot;zygisk&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strstr</span>(name, <span class="string">&quot;su&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取伪造的属性值</span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span>* <span class="title function_">get_fake_prop_value</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *name)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;ro.debuggable&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;0&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;ro.secure&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;1&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;ro.build.selinux&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;1&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;ro.build.tags&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;release-keys&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;ro.build.type&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;user&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;ro.kernel.qemu&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;0&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strstr</span>(name, <span class="string">&quot;magisk&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strstr</span>(name, <span class="string">&quot;zygisk&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strstr</span>(name, <span class="string">&quot;su&quot;</span>) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="string">&quot;1&quot;</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-进程隐藏"><a href="#5-进程隐藏" class="headerlink" title="5. 进程隐藏"></a>5. 进程隐藏</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Shamiko进程隐藏实现</span></span><br><span class="line"><span class="type">long</span> <span class="title function_">shamiko_kill</span><span class="params">(<span class="keyword">struct</span> pt_regs *regs)</span> &#123;</span><br><span class="line">    <span class="type">pid_t</span> pid = regs-&gt;di;</span><br><span class="line">    <span class="type">int</span> sig = regs-&gt;si;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查是否为Root相关进程</span></span><br><span class="line">    <span class="keyword">if</span> (is_root_process(pid)) &#123;</span><br><span class="line">        <span class="comment">// 隐藏进程，不执行kill操作</span></span><br><span class="line">        regs-&gt;ax = <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 正常进程操作</span></span><br><span class="line">    <span class="keyword">return</span> original_kill(regs);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断是否为Root相关进程</span></span><br><span class="line"><span class="type">bool</span> <span class="title function_">is_root_process</span><span class="params">(<span class="type">pid_t</span> pid)</span> &#123;</span><br><span class="line">    <span class="type">char</span> path[<span class="number">256</span>];</span><br><span class="line">    <span class="type">char</span> cmdline[<span class="number">256</span>];</span><br><span class="line">    </span><br><span class="line">    <span class="built_in">snprintf</span>(path, <span class="keyword">sizeof</span>(path), <span class="string">&quot;/proc/%d/cmdline&quot;</span>, pid);</span><br><span class="line">    </span><br><span class="line">    FILE *fp = fopen(path, <span class="string">&quot;r&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (fp == <span class="literal">NULL</span>) <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    </span><br><span class="line">    fgets(cmdline, <span class="keyword">sizeof</span>(cmdline), fp);</span><br><span class="line">    fclose(fp);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查进程名</span></span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *root_processes[] = &#123;</span><br><span class="line">        <span class="string">&quot;su&quot;</span>,</span><br><span class="line">        <span class="string">&quot;daemonsu&quot;</span>,</span><br><span class="line">        <span class="string">&quot;magisk&quot;</span>,</span><br><span class="line">        <span class="string">&quot;magiskd&quot;</span>,</span><br><span class="line">        <span class="string">&quot;magiskhide&quot;</span>,</span><br><span class="line">        <span class="string">&quot;zygisk&quot;</span>,</span><br><span class="line">        <span class="string">&quot;shamiko&quot;</span>,</span><br><span class="line">        <span class="string">&quot;kinguser&quot;</span>,</span><br><span class="line">        <span class="string">&quot;kingroot&quot;</span>,</span><br><span class="line">        <span class="string">&quot;360root&quot;</span>,</span><br><span class="line">        <span class="string">&quot;rootmaster&quot;</span></span><br><span class="line">    &#125;;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="keyword">sizeof</span>(root_processes)/<span class="keyword">sizeof</span>(root_processes[<span class="number">0</span>]); i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">strstr</span>(cmdline, root_processes[i]) != <span class="literal">NULL</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-API-Hook实现"><a href="#6-API-Hook实现" class="headerlink" title="6. API Hook实现"></a>6. API Hook实现</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Shamiko API Hook实现</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">enable_api_hooks</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// Hook Java层API</span></span><br><span class="line">    <span class="keyword">if</span> (hook_java_apis() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook Native层API</span></span><br><span class="line">    <span class="keyword">if</span> (hook_native_apis() != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Hook Java层API</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">hook_java_apis</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">// Hook SystemProperties.get</span></span><br><span class="line">    <span class="keyword">if</span> (hook_java_method(<span class="string">&quot;android.os.SystemProperties&quot;</span>, <span class="string">&quot;get&quot;</span>, </span><br><span class="line">                        <span class="string">&quot;(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;&quot;</span>,</span><br><span class="line">                        (<span class="type">void</span>*)shamiko_system_properties_get) != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook File.exists</span></span><br><span class="line">    <span class="keyword">if</span> (hook_java_method(<span class="string">&quot;java.io.File&quot;</span>, <span class="string">&quot;exists&quot;</span>, <span class="string">&quot;()Z&quot;</span>,</span><br><span class="line">                        (<span class="type">void</span>*)shamiko_file_exists) != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook ProcessBuilder</span></span><br><span class="line">    <span class="keyword">if</span> (hook_java_method(<span class="string">&quot;java.lang.ProcessBuilder&quot;</span>, <span class="string">&quot;start&quot;</span>, <span class="string">&quot;()Ljava/lang/Process;&quot;</span>,</span><br><span class="line">                        (<span class="type">void</span>*)shamiko_process_builder_start) != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Hook SystemProperties.get</span></span><br><span class="line">jstring <span class="title function_">shamiko_system_properties_get</span><span class="params">(JNIEnv *env, jclass clazz, jstring key, jstring def)</span> &#123;</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *key_str = (*env)-&gt;GetStringUTFChars(env, key, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *def_str = (*env)-&gt;GetStringUTFChars(env, def, <span class="literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查是否为Root相关属性</span></span><br><span class="line">    <span class="keyword">if</span> (is_root_prop(key_str)) &#123;</span><br><span class="line">        <span class="comment">// 返回伪造的属性值</span></span><br><span class="line">        <span class="type">const</span> <span class="type">char</span> *fake_value = get_fake_prop_value(key_str);</span><br><span class="line">        jstring result = (*env)-&gt;NewStringUTF(env, fake_value);</span><br><span class="line">        </span><br><span class="line">        (*env)-&gt;ReleaseStringUTFChars(env, key, key_str);</span><br><span class="line">        (*env)-&gt;ReleaseStringUTFChars(env, def, def_str);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 正常属性获取</span></span><br><span class="line">    jstring result = original_system_properties_get(env, clazz, key, def);</span><br><span class="line">    </span><br><span class="line">    (*env)-&gt;ReleaseStringUTFChars(env, key, key_str);</span><br><span class="line">    (*env)-&gt;ReleaseStringUTFChars(env, def, def_str);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Hook File.exists</span></span><br><span class="line">jboolean <span class="title function_">shamiko_file_exists</span><span class="params">(JNIEnv *env, jobject thiz)</span> &#123;</span><br><span class="line">    <span class="comment">// 获取文件路径</span></span><br><span class="line">    jclass file_class = (*env)-&gt;GetObjectClass(env, thiz);</span><br><span class="line">    jfieldID path_field = (*env)-&gt;GetFieldID(env, file_class, <span class="string">&quot;path&quot;</span>, <span class="string">&quot;Ljava/lang/String;&quot;</span>);</span><br><span class="line">    jstring path_obj = (jstring)(*env)-&gt;GetObjectField(env, thiz, path_field);</span><br><span class="line">    </span><br><span class="line">    <span class="type">const</span> <span class="type">char</span> *path_str = (*env)-&gt;GetStringUTFChars(env, path_obj, <span class="literal">NULL</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检查是否为Root相关文件</span></span><br><span class="line">    <span class="keyword">if</span> (is_root_file(path_str)) &#123;</span><br><span class="line">        (*env)-&gt;ReleaseStringUTFChars(env, path_obj, path_str);</span><br><span class="line">        <span class="keyword">return</span> JNI_FALSE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 正常文件检查</span></span><br><span class="line">    jboolean result = original_file_exists(env, thiz);</span><br><span class="line">    </span><br><span class="line">    (*env)-&gt;ReleaseStringUTFChars(env, path_obj, path_str);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Shamiko检测绕过"><a href="#Shamiko检测绕过" class="headerlink" title="Shamiko检测绕过"></a>Shamiko检测绕过</h2><h3 id="1-传统检测绕过"><a href="#1-传统检测绕过" class="headerlink" title="1. 传统检测绕过"></a>1. 传统检测绕过</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 传统Root检测绕过</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TraditionalRootDetector</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isRooted</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> checkRootFiles() || </span><br><span class="line">               checkRootProps() || </span><br><span class="line">               checkRootProcesses();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkRootFiles</span><span class="params">()</span> &#123;</span><br><span class="line">        String[] rootFiles = &#123;</span><br><span class="line">            <span class="string">&quot;/system/app/Superuser.apk&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/sbin/su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/system/bin/su&quot;</span>,</span><br><span class="line">            <span class="string">&quot;/system/xbin/su&quot;</span></span><br><span class="line">        &#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (String file : rootFiles) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">new</span> <span class="title class_">File</span>(file).exists()) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkRootProps</span><span class="params">()</span> &#123;</span><br><span class="line">        String[] rootProps = &#123;</span><br><span class="line">            <span class="string">&quot;ro.debuggable&quot;</span>,</span><br><span class="line">            <span class="string">&quot;ro.secure&quot;</span>,</span><br><span class="line">            <span class="string">&quot;ro.build.selinux&quot;</span></span><br><span class="line">        &#125;;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">for</span> (String prop : rootProps) &#123;</span><br><span class="line">            <span class="type">String</span> <span class="variable">value</span> <span class="operator">=</span> SystemProperties.get(prop, <span class="string">&quot;1&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (<span class="string">&quot;0&quot;</span>.equals(value)) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-现代检测绕过"><a href="#2-现代检测绕过" class="headerlink" title="2. 现代检测绕过"></a>2. 现代检测绕过</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 现代Root检测绕过</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ModernRootDetector</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">boolean</span> <span class="title function_">isRooted</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> checkMagisk() || </span><br><span class="line">               checkZygisk() || </span><br><span class="line">               checkShamiko() ||</span><br><span class="line">               checkRuntimeDetection();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkMagisk</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 检测Magisk特征</span></span><br><span class="line">        <span class="keyword">if</span> (checkMagiskProps()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (checkMagiskFiles()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (checkMagiskModules()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkZygisk</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 检测Zygisk特征</span></span><br><span class="line">        <span class="keyword">if</span> (checkZygiskProps()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (checkZygiskFiles()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (checkZygiskModules()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">checkShamiko</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 检测Shamiko特征</span></span><br><span class="line">        <span class="keyword">if</span> (checkShamikoProps()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (checkShamikoFiles()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">if</span> (checkShamikoModules()) <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-反检测绕过"><a href="#3-反检测绕过" class="headerlink" title="3. 反检测绕过"></a>3. 反检测绕过</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 反检测绕过</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AntiDetection</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook系统属性获取</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getSystemProperty</span><span class="params">(String key, String defaultValue)</span> &#123;</span><br><span class="line">        <span class="comment">// 返回伪造的属性值</span></span><br><span class="line">        <span class="keyword">if</span> (isRootProp(key)) &#123;</span><br><span class="line">            <span class="keyword">return</span> getFakePropValue(key);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> SystemProperties.get(key, defaultValue);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook文件存在检查</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">fileExists</span><span class="params">(String path)</span> &#123;</span><br><span class="line">        <span class="comment">// 隐藏Root相关文件</span></span><br><span class="line">        <span class="keyword">if</span> (isRootFile(path)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">File</span>(path).exists();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// Hook进程检查</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">boolean</span> <span class="title function_">isProcessRunning</span><span class="params">(String processName)</span> &#123;</span><br><span class="line">        <span class="comment">// 隐藏Root相关进程</span></span><br><span class="line">        <span class="keyword">if</span> (isRootProcess(processName)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> checkProcessRunning(processName);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>Shamiko模块作为最强大的Root隐藏方案，通过全面的系统调用Hook和API拦截，几乎可以绕过所有常见的Root检测。其技术原理基于Zygisk框架，在Zygote进程启动时加载，影响所有应用进程。</p>
+<p><strong>核心实现原理机制</strong>：基于Zygisk框架的系统调用Hook</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章推荐</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\08\15\article9_android_root_tools\" rel="bookmark">Android Root工具原理深度解析：从Magisk到KernelSU的技术演进</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\12\article9_android_root_tools_v2\" rel="bookmark">Android Root技术解析：从传统到现代的三种主流方案</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div>持续输出技术分享，您的支持将鼓励我继续创作!</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wxpay.jpg" alt="果子 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="果子 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>果子
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://ihandmine.github.io/2025/09/13/article10_shamiko_analysis/" title="Magisk Root隐藏方案：Shamiko模块原理解析">https://ihandmine.github.io/2025/09/13/article10_shamiko_analysis/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags" id="post-tags">
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+              <a href="/tags/Root/" rel="tag"><i class="fa fa-tag"></i> Root</a>
+              <a href="/tags/%E9%9A%90%E8%97%8F%E6%96%B9%E6%A1%88/" rel="tag"><i class="fa fa-tag"></i> 隐藏方案</a>
+              <a href="/tags/Shamiko%E6%A8%A1%E5%9D%97/" rel="tag"><i class="fa fa-tag"></i> Shamiko模块</a>
+              <a href="/tags/%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 原理解析</a>
+          </div>
+
+        <script type="text/javascript">
+        var tagsall=document.getElementsByClassName("post-tags")
+        for (var i = tagsall.length - 1; i >= 0; i--){
+            var tags=tagsall[i].getElementsByTagName("a");
+            for (var j = tags.length - 1; j >= 0; j--) {
+                var r=Math.floor(Math.random()*75+130);
+                var g=Math.floor(Math.random()*75+100);
+                var b=Math.floor(Math.random()*75+80);
+                tags[j].style.background = "rgb("+r+","+g+","+b+")";
+            }
+        }                        
+        </script>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/09/12/article9_android_root_tools_v2/" rel="prev" title="Android Root技术解析：从传统到现代的三种主流方案">
+      <i class="fa fa-chevron-left"></i> Android Root技术解析：从传统到现代的三种主流方案
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/09/15/article11_frida_hook/" rel="next" title="Frida Hook技术入门：从零开始掌握动态分析神器">
+      Frida Hook技术入门：从零开始掌握动态分析神器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Shamiko%E6%A8%A1%E5%9D%97%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">Shamiko模块概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">1.1.</span> <span class="nav-text">模块基本信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E7%89%B9%E6%80%A7"><span class="nav-number">1.2.</span> <span class="nav-text">核心特性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shamiko%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">Shamiko安装方法：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%B8%8B%E8%BD%BDShamiko%E6%A8%A1%E5%9D%97"><span class="nav-number">2.1.</span> <span class="nav-text">1. 下载Shamiko模块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%AE%89%E8%A3%85Shamiko%E6%A8%A1%E5%9D%97-%E5%9C%B0%E5%9D%80%EF%BC%9Ahttps-magiskcn-com-shamiko-install-html"><span class="nav-number">2.2.</span> <span class="nav-text">2. 安装Shamiko模块 地址：https:&#x2F;&#x2F;magiskcn.com&#x2F;shamiko-install.html</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%8E%A8%E8%8D%90%E4%BD%BF%E7%94%A8%E7%99%BD%E5%90%8D%E5%8D%95%E6%A8%A1%E5%BC%8F-%E5%9C%B0%E5%9D%80%EF%BC%9Ahttps-magiskcn-com-shamiko-whitelist-html"><span class="nav-number">2.3.</span> <span class="nav-text">3. 推荐使用白名单模式 地址：https:&#x2F;&#x2F;magiskcn.com&#x2F;shamiko-whitelist.html</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shamiko%E6%8A%80%E6%9C%AF%E5%8E%9F%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">Shamiko技术原理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E9%9A%90%E8%97%8F%E6%9C%BA%E5%88%B6"><span class="nav-number">3.1.</span> <span class="nav-text">核心隐藏机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E6%9E%B6%E6%9E%84"><span class="nav-number">3.2.</span> <span class="nav-text">技术架构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shamiko%E6%A0%B8%E5%BF%83%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.</span> <span class="nav-text">Shamiko核心实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%A8%A1%E5%9D%97%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">4.1.</span> <span class="nav-text">1. 模块初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8Hook"><span class="nav-number">4.2.</span> <span class="nav-text">2. 系统调用Hook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%9A%90%E8%97%8F"><span class="nav-number">4.3.</span> <span class="nav-text">3. 文件系统隐藏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-%E7%B3%BB%E7%BB%9F%E5%B1%9E%E6%80%A7%E4%BC%AA%E9%80%A0"><span class="nav-number">4.4.</span> <span class="nav-text">4. 系统属性伪造</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-%E8%BF%9B%E7%A8%8B%E9%9A%90%E8%97%8F"><span class="nav-number">4.5.</span> <span class="nav-text">5. 进程隐藏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-API-Hook%E5%AE%9E%E7%8E%B0"><span class="nav-number">4.6.</span> <span class="nav-text">6. API Hook实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shamiko%E6%A3%80%E6%B5%8B%E7%BB%95%E8%BF%87"><span class="nav-number">5.</span> <span class="nav-text">Shamiko检测绕过</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E4%BC%A0%E7%BB%9F%E6%A3%80%E6%B5%8B%E7%BB%95%E8%BF%87"><span class="nav-number">5.1.</span> <span class="nav-text">1. 传统检测绕过</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E7%8E%B0%E4%BB%A3%E6%A3%80%E6%B5%8B%E7%BB%95%E8%BF%87"><span class="nav-number">5.2.</span> <span class="nav-text">2. 现代检测绕过</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E5%8F%8D%E6%A3%80%E6%B5%8B%E7%BB%95%E8%BF%87"><span class="nav-number">5.3.</span> <span class="nav-text">3. 反检测绕过</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">6.</span> <span class="nav-text">结语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="果子"
+      src="/images/gzhavatar.jpg">
+  <p class="site-author-name" itemprop="name">果子</p>
+  <div class="site-description" itemprop="description">简单正直</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ihandmine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ihandmine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/handmine@outlook.com" title="E-Mail → handmine@outlook.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果子</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">221k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:21</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/tororo.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>

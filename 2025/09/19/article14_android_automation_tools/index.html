@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/OIP.jpg">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/OIP.jpg">
+  <link rel="mask-icon" href="/images/OIP.jpg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ihandmine.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":true,"scrollpercent":true},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Android自动化工具概述什么是Android自动化工具Android自动化工具是基于ADB等底层接口构建的测试和操作工具，主要功能：  自动化UI操作 应用测试 性能监控 批量处理 智能分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于ADB的Android自动化工具全解析">
+<meta property="og:url" content="https://ihandmine.github.io/2025/09/19/article14_android_automation_tools/index.html">
+<meta property="og:site_name" content="一枚酸心果子">
+<meta property="og:description" content="Android自动化工具概述什么是Android自动化工具Android自动化工具是基于ADB等底层接口构建的测试和操作工具，主要功能：  自动化UI操作 应用测试 性能监控 批量处理 智能分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2025-09-19T07:24:44.000Z">
+<meta property="article:modified_time" content="2025-10-17T03:46:26.900Z">
+<meta property="article:author" content="果子">
+<meta property="article:tag" content="ADB">
+<meta property="article:tag" content="Android">
+<meta property="article:tag" content="自动化工具">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://ihandmine.github.io/2025/09/19/article14_android_automation_tools/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>基于ADB的Android自动化工具全解析 | 一枚酸心果子</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">一枚酸心果子</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">果子果子果子果子果子~~~</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">63</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">6</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">21</span></a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+  <a href="https://github.com/ihandmine" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://ihandmine.github.io/2025/09/19/article14_android_automation_tools/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/gzhavatar.jpg">
+      <meta itemprop="name" content="果子">
+      <meta itemprop="description" content="简单正直">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="一枚酸心果子">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于ADB的Android自动化工具全解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-09-19 15:24:44" itemprop="dateCreated datePublished" datetime="2025-09-19T15:24:44+08:00">2025-09-19</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-10-17 11:46:26" itemprop="dateModified" datetime="2025-10-17T11:46:26+08:00">2025-10-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BD%91%E7%BB%9C%E5%AE%89%E5%85%A8/" itemprop="url" rel="index"><span itemprop="name">网络安全</span></a>
+                </span>
+            </span>
+
+          <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="Android自动化工具概述"><a href="#Android自动化工具概述" class="headerlink" title="Android自动化工具概述"></a>Android自动化工具概述</h2><h3 id="什么是Android自动化工具"><a href="#什么是Android自动化工具" class="headerlink" title="什么是Android自动化工具"></a>什么是Android自动化工具</h3><p><strong>Android自动化工具</strong>是基于ADB等底层接口构建的测试和操作工具，主要功能：</p>
+<ul>
+<li>自动化UI操作</li>
+<li>应用测试</li>
+<li>性能监控</li>
+<li>批量处理</li>
+<li>智能分析</li>
+</ul>
+<span id="more"></span>
+
+<h2 id="自动化工具"><a href="#自动化工具" class="headerlink" title="自动化工具"></a>自动化工具</h2><h3 id="1-Appium"><a href="#1-Appium" class="headerlink" title="1. Appium"></a>1. Appium</h3><p><strong>项目介绍</strong>：Appium是一个开源的移动应用自动化测试框架，支持Android和iOS平台。</p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>跨平台支持</li>
+<li>多语言支持（Python、Java、JavaScript等）</li>
+<li>基于WebDriver协议</li>
+<li>支持原生、混合和Web应用</li>
+</ul>
+<p><strong>安装配置</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装Node.js</span></span><br><span class="line">npm install -g appium</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装Android驱动</span></span><br><span class="line">npm install -g appium-doctor</span><br><span class="line">appium-doctor --android</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动Appium服务器</span></span><br><span class="line">appium</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> appium <span class="keyword">import</span> webdriver</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置Desired Capabilities</span></span><br><span class="line">desired_caps = &#123;</span><br><span class="line">    <span class="string">&#x27;platformName&#x27;</span>: <span class="string">&#x27;Android&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;deviceName&#x27;</span>: <span class="string">&#x27;Android Emulator&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;appPackage&#x27;</span>: <span class="string">&#x27;com.example.app&#x27;</span>,</span><br><span class="line">    <span class="string">&#x27;appActivity&#x27;</span>: <span class="string">&#x27;.MainActivity&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建驱动实例</span></span><br><span class="line">driver = webdriver.Remote(<span class="string">&#x27;http://localhost:4723/wd/hub&#x27;</span>, desired_caps)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行操作</span></span><br><span class="line">driver.find_element_by_id(<span class="string">&quot;button1&quot;</span>).click()</span><br><span class="line">driver.find_element_by_xpath(<span class="string">&quot;//android.widget.EditText&quot;</span>).send_keys(<span class="string">&quot;test&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 关闭驱动</span></span><br><span class="line">driver.quit()</span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>移动应用UI自动化测试</li>
+<li>跨平台兼容性测试</li>
+<li>回归测试自动化</li>
+<li>性能测试</li>
+</ul>
+<h3 id="2-UIAutomator2"><a href="#2-UIAutomator2" class="headerlink" title="2. UIAutomator2"></a>2. UIAutomator2</h3><p><strong>项目介绍</strong>：UIAutomator2是Google官方提供的Android UI自动化测试框架的Python封装。</p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>基于Google UIAutomator</li>
+<li>Python语言支持</li>
+<li>支持复杂UI操作</li>
+<li>性能优秀</li>
+</ul>
+<p><strong>安装配置</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装UIAutomator2</span></span><br><span class="line">pip install uiautomator2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化设备</span></span><br><span class="line">python -m uiautomator2 init</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接设备</span></span><br><span class="line">python -c <span class="string">&quot;import uiautomator2 as u2; d = u2.connect()&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> uiautomator2 <span class="keyword">as</span> u2</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接设备</span></span><br><span class="line">d = u2.connect()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动应用</span></span><br><span class="line">d.app_start(<span class="string">&quot;com.example.app&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 点击元素</span></span><br><span class="line">d(text=<span class="string">&quot;登录&quot;</span>).click()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输入文本</span></span><br><span class="line">d(className=<span class="string">&quot;android.widget.EditText&quot;</span>).set_text(<span class="string">&quot;username&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 滑动操作</span></span><br><span class="line">d.swipe(<span class="number">500</span>, <span class="number">1000</span>, <span class="number">500</span>, <span class="number">500</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 截图</span></span><br><span class="line">d.screenshot(<span class="string">&quot;screenshot.png&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>Android原生应用测试</li>
+<li>UI元素定位和操作</li>
+<li>手势操作测试</li>
+<li>屏幕截图和对比</li>
+</ul>
+<h3 id="3-ADB-Shell自动化"><a href="#3-ADB-Shell自动化" class="headerlink" title="3. ADB Shell自动化"></a>3. ADB Shell自动化</h3><p><strong>项目介绍</strong>：基于ADB Shell命令的自动化脚本，轻量级且灵活。</p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>轻量级实现</li>
+<li>完全基于ADB</li>
+<li>高度可定制</li>
+<li>学习成本低</li>
+</ul>
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 简单的ADB自动化脚本</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动应用</span></span><br><span class="line">adb shell am start -n com.example.app/.MainActivity</span><br><span class="line"></span><br><span class="line"><span class="comment"># 等待应用启动</span></span><br><span class="line"><span class="built_in">sleep</span> 3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 点击坐标</span></span><br><span class="line">adb shell input tap 500 500</span><br><span class="line"></span><br><span class="line"><span class="comment"># 输入文本</span></span><br><span class="line">adb shell input text <span class="string">&quot;test123&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 按键操作</span></span><br><span class="line">adb shell input keyevent 66</span><br><span class="line"></span><br><span class="line"><span class="comment"># 截图</span></span><br><span class="line">adb shell screencap /sdcard/screenshot.png</span><br><span class="line">adb pull /sdcard/screenshot.png</span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>简单的自动化任务</li>
+<li>快速原型开发</li>
+<li>设备管理自动化</li>
+<li>批量操作</li>
+</ul>
+<h3 id="4-Airtest"><a href="#4-Airtest" class="headerlink" title="4. Airtest"></a>4. Airtest</h3><p><strong>项目介绍</strong>：Airtest是网易开源的跨平台UI自动化测试框架，支持图像识别和脚本录制。</p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>图像识别技术</li>
+<li>跨平台支持</li>
+<li>可视化脚本录制</li>
+<li>丰富的API</li>
+</ul>
+<p><strong>安装配置</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装Airtest</span></span><br><span class="line">pip install airtest</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装Poco</span></span><br><span class="line">pip install pocoui</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动Airtest IDE</span></span><br><span class="line">airtest</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> airtest.core.api <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接设备</span></span><br><span class="line">connect_device(<span class="string">&quot;Android:///&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动应用</span></span><br><span class="line">start_app(<span class="string">&quot;com.example.app&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 图像识别点击</span></span><br><span class="line">touch(Template(<span class="string">&quot;button.png&quot;</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 文本输入</span></span><br><span class="line">text(<span class="string">&quot;username&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 滑动操作</span></span><br><span class="line">swipe((<span class="number">500</span>, <span class="number">1000</span>), (<span class="number">500</span>, <span class="number">500</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 断言</span></span><br><span class="line">assert_exists(Template(<span class="string">&quot;success.png&quot;</span>))</span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>游戏自动化测试</li>
+<li>图像识别测试</li>
+<li>跨平台应用测试</li>
+<li>快速脚本录制</li>
+</ul>
+<h3 id="5-STF-Smartphone-Test-Farm"><a href="#5-STF-Smartphone-Test-Farm" class="headerlink" title="5. STF (Smartphone Test Farm)"></a>5. STF (Smartphone Test Farm)</h3><p><strong>项目介绍</strong>：STF是一个开源的移动设备管理平台，支持远程设备访问和自动化测试。</p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>设备远程访问</li>
+<li>多设备管理</li>
+<li>Web界面操作</li>
+<li>支持自动化测试</li>
+</ul>
+<p><strong>安装配置</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装STF</span></span><br><span class="line">npm install -g stf</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动STF</span></span><br><span class="line">stf <span class="built_in">local</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// STF自动化脚本</span></span><br><span class="line"><span class="keyword">const</span> stf = <span class="built_in">require</span>(<span class="string">&#x27;stf&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 连接设备</span></span><br><span class="line"><span class="keyword">const</span> device = stf.<span class="title function_">connect</span>(<span class="string">&#x27;device_id&#x27;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行操作</span></span><br><span class="line">device.<span class="title function_">tap</span>(<span class="number">500</span>, <span class="number">500</span>);</span><br><span class="line">device.<span class="title function_">input</span>(<span class="string">&#x27;test123&#x27;</span>);</span><br><span class="line">device.<span class="title function_">screenshot</span>(<span class="string">&#x27;screenshot.png&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>远程设备测试</li>
+<li>多设备并行测试</li>
+<li>设备资源共享</li>
+<li>云端测试平台</li>
+</ul>
+<h3 id="6-Appium-Inspector-AI"><a href="#6-Appium-Inspector-AI" class="headerlink" title="6. Appium Inspector AI"></a>6. Appium Inspector AI</h3><p><strong>项目介绍</strong>：基于AI技术的Appium增强版本，能够智能识别UI元素和生成测试脚本。</p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>AI元素识别</li>
+<li>智能脚本生成</li>
+<li>自动元素定位</li>
+<li>学习用户行为</li>
+</ul>
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> appium_ai <span class="keyword">import</span> WebDriver</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建AI驱动</span></span><br><span class="line">driver = WebDriver(desired_caps)</span><br><span class="line"></span><br><span class="line"><span class="comment"># AI智能点击</span></span><br><span class="line">driver.ai_click(<span class="string">&quot;登录按钮&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># AI智能输入</span></span><br><span class="line">driver.ai_input(<span class="string">&quot;用户名&quot;</span>, <span class="string">&quot;testuser&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># AI智能等待</span></span><br><span class="line">driver.ai_wait(<span class="string">&quot;页面加载完成&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成测试报告</span></span><br><span class="line">driver.generate_ai_report()</span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>智能测试脚本生成</li>
+<li>复杂UI元素识别</li>
+<li>自适应测试用例</li>
+<li>测试用例维护</li>
+</ul>
+<h3 id="7-Test-ai"><a href="#7-Test-ai" class="headerlink" title="7. Test.ai"></a>7. Test.ai</h3><p><strong>项目介绍</strong>：基于机器学习的移动应用测试平台，能够自动生成和执行测试用例。</p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>机器学习算法</li>
+<li>自动测试生成</li>
+<li>智能缺陷检测</li>
+<li>性能分析</li>
+</ul>
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> testai <span class="keyword">import</span> TestAI</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建TestAI实例</span></span><br><span class="line">testai = TestAI()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析应用</span></span><br><span class="line">testai.analyze_app(<span class="string">&quot;com.example.app&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成测试用例</span></span><br><span class="line">test_cases = testai.generate_test_cases()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行测试</span></span><br><span class="line">results = testai.run_tests(test_cases)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成报告</span></span><br><span class="line">testai.generate_report(results)</span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>自动化测试用例生成</li>
+<li>智能缺陷检测</li>
+<li>性能瓶颈分析</li>
+<li>测试覆盖率分析</li>
+</ul>
+<h3 id="8-Katalon-Studio"><a href="#8-Katalon-Studio" class="headerlink" title="8. Katalon Studio"></a>8. Katalon Studio</h3><p><strong>项目介绍</strong>：Katalon Studio是一个基于AI的测试自动化平台，支持Web、移动和API测试。</p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>AI驱动的测试</li>
+<li>可视化测试设计</li>
+<li>智能元素识别</li>
+<li>集成CI&#x2F;CD</li>
+</ul>
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Katalon Studio脚本</span></span><br><span class="line"><span class="keyword">import</span> com.kms.katalon.core.testobject.TestObject</span><br><span class="line"><span class="keyword">import</span> com.kms.katalon.core.testobject.TestObjectProperty</span><br><span class="line"></span><br><span class="line"><span class="comment">// 创建测试对象</span></span><br><span class="line">TestObject button = <span class="keyword">new</span> TestObject(<span class="string">&quot;Login Button&quot;</span>)</span><br><span class="line">button.addProperty(<span class="string">&quot;xpath&quot;</span>, ConditionType.EQUALS, <span class="string">&quot;//button[@id=&#x27;login&#x27;]&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 执行操作</span></span><br><span class="line">WebUI.click(button)</span><br><span class="line">WebUI.setText(findTestObject(<span class="string">&quot;Username Field&quot;</span>), <span class="string">&quot;testuser&quot;</span>)</span><br><span class="line">WebUI.click(findTestObject(<span class="string">&quot;Submit Button&quot;</span>))</span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>企业级测试自动化</li>
+<li>跨平台测试</li>
+<li>持续集成测试</li>
+<li>测试数据管理</li>
+</ul>
+<h3 id="9-Android-UI-Automator-AI"><a href="#9-Android-UI-Automator-AI" class="headerlink" title="9. Android UI Automator AI"></a>9. Android UI Automator AI</h3><p><strong>项目介绍</strong>：基于深度学习的Android UI自动化框架，能够智能识别和操作UI元素。</p>
+<p><strong>GitHub地址</strong>：<a target="_blank" rel="noopener" href="https://github.com/android-ui-automator-ai">https://github.com/android-ui-automator-ai</a></p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>深度学习模型</li>
+<li>智能元素识别</li>
+<li>自适应操作</li>
+<li>多语言支持</li>
+</ul>
+<p><strong>安装配置</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 克隆项目</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/android-ui-automator-ai/android-ui-automator-ai.git</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装依赖</span></span><br><span class="line">pip install -r requirements.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 训练模型</span></span><br><span class="line">python train_model.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># 运行测试</span></span><br><span class="line">python run_tests.py</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> android_ui_automator_ai <span class="keyword">import</span> AndroidUIAutomatorAI</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建AI实例</span></span><br><span class="line">ai = AndroidUIAutomatorAI()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 连接设备</span></span><br><span class="line">ai.connect_device()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 智能操作</span></span><br><span class="line">ai.smart_click(<span class="string">&quot;登录&quot;</span>)</span><br><span class="line">ai.smart_input(<span class="string">&quot;用户名&quot;</span>, <span class="string">&quot;testuser&quot;</span>)</span><br><span class="line">ai.smart_swipe(<span class="string">&quot;向下滑动&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成测试报告</span></span><br><span class="line">ai.generate_report()</span><br></pre></td></tr></table></figure>
+
+<h3 id="10-Mobile-Test-AI"><a href="#10-Mobile-Test-AI" class="headerlink" title="10. Mobile Test AI"></a>10. Mobile Test AI</h3><p><strong>项目介绍</strong>：基于计算机视觉的移动应用测试AI框架，能够理解应用界面并生成测试用例。</p>
+<p><strong>GitHub地址</strong>：<a target="_blank" rel="noopener" href="https://github.com/mobile-test-ai">https://github.com/mobile-test-ai</a></p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>计算机视觉技术</li>
+<li>自然语言处理</li>
+<li>自动测试生成</li>
+<li>智能缺陷检测</li>
+</ul>
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> mobile_test_ai <span class="keyword">import</span> MobileTestAI</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建AI实例</span></span><br><span class="line">ai = MobileTestAI()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析应用界面</span></span><br><span class="line">ai.analyze_ui(<span class="string">&quot;com.example.app&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成测试用例</span></span><br><span class="line">test_cases = ai.generate_test_cases(<span class="string">&quot;用户登录流程&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行测试</span></span><br><span class="line">results = ai.execute_tests(test_cases)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 分析结果</span></span><br><span class="line">ai.analyze_results(results)</span><br></pre></td></tr></table></figure>
+
+<h3 id="11-Mobile-Use"><a href="#11-Mobile-Use" class="headerlink" title="11. Mobile-Use"></a>11. Mobile-Use</h3><p><strong>项目介绍</strong>：Mobile-Use是一个强大的开源AI代理，能够使用自然语言控制Android和iOS设备，就像人类一样与应用程序交互。</p>
+<p><strong>GitHub地址</strong>：<a target="_blank" rel="noopener" href="https://github.com/minitap-ai/mobile-use">https://github.com/minitap-ai/mobile-use</a></p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>自然语言控制：使用母语与手机交互</li>
+<li>UI感知自动化：智能导航应用界面</li>
+<li>数据抓取：从任何应用中提取信息并结构化</li>
+<li>可扩展性：轻松配置不同的LLM来驱动代理</li>
+</ul>
+<p><strong>安装配置</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 克隆项目</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/minitap-ai/mobile-use.git</span><br><span class="line"><span class="built_in">cd</span> mobile-use</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置环境变量</span></span><br><span class="line"><span class="built_in">cp</span> .env.example .<span class="built_in">env</span></span><br><span class="line"><span class="comment"># 编辑.env文件添加API密钥</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建虚拟环境</span></span><br><span class="line">uv venv</span><br><span class="line"><span class="built_in">source</span> .venv/bin/activate  <span class="comment"># Linux/macOS</span></span><br><span class="line"><span class="comment"># 或 .venv\Scripts\activate  # Windows</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装依赖</span></span><br><span class="line">uv <span class="built_in">sync</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基本命令</span></span><br><span class="line">python ./src/mobile_use/main.py <span class="string">&quot;Go to settings and tell me my current battery level&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据抓取示例</span></span><br><span class="line">python ./src/mobile_use/main.py \</span><br><span class="line">  <span class="string">&quot;Open Gmail, find all unread emails, and list their sender and subject line&quot;</span> \</span><br><span class="line">  --output-description <span class="string">&quot;A JSON list of objects, each with &#x27;sender&#x27; and &#x27;subject&#x27; keys&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Docker快速启动</span></span><br><span class="line">bash ./mobile-use.sh \</span><br><span class="line">  <span class="string">&quot;Open Gmail, find first 3 unread emails, and list their sender and subject line&quot;</span> \</span><br><span class="line">  --output-description <span class="string">&quot;A JSON list of objects, each with &#x27;sender&#x27; and &#x27;subject&#x27; keys&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>自然语言自动化任务</li>
+<li>应用数据提取和分析</li>
+<li>复杂UI导航和操作</li>
+<li>多步骤任务自动化</li>
+</ul>
+<h3 id="12-DroidRun"><a href="#12-DroidRun" class="headerlink" title="12. DroidRun"></a>12. DroidRun</h3><p><strong>项目介绍</strong>：DroidRun是一个基于大型语言模型的开源项目，通过自然语言指令实现对Android设备的自动化控制，结合计算机视觉和UI结构分析技术。</p>
+<p><strong>GitHub地址</strong>：<a target="_blank" rel="noopener" href="https://github.com/droidrun/droidrun">https://github.com/droidrun/droidrun</a></p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>自然语言控制：通过简单指令执行复杂操作</li>
+<li>自我修复机制：检测并修复操作错误</li>
+<li>UI结构分析：精准识别屏幕元素</li>
+<li>智能任务规划：自动分解复杂任务</li>
+</ul>
+<p><strong>安装配置</strong>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 克隆项目</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/droidrun/droidrun.git</span><br><span class="line"><span class="built_in">cd</span> droidrun</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装依赖</span></span><br><span class="line">pip install -r requirements.txt</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置环境</span></span><br><span class="line"><span class="built_in">cp</span> config.example.json config.json</span><br><span class="line"><span class="comment"># 编辑配置文件</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> droidrun <span class="keyword">import</span> DroidRunAgent</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建代理</span></span><br><span class="line">agent = DroidRunAgent()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 自然语言控制</span></span><br><span class="line">agent.execute(<span class="string">&quot;打开微信，发送消息给张三：你好&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 复杂任务</span></span><br><span class="line">agent.execute(<span class="string">&quot;打开购物应用，搜索iPhone，选择第一个商品，加入购物车&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据提取</span></span><br><span class="line">result = agent.extract_data(<span class="string">&quot;获取通讯录中所有联系人的姓名和电话&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>实际应用场景</strong>：</p>
+<ul>
+<li>社交媒体自动化管理</li>
+<li>日常任务自动化执行</li>
+<li>应用功能测试</li>
+<li>用户行为模拟</li>
+</ul>
+<h3 id="13-Appium-AI-Assistant"><a href="#13-Appium-AI-Assistant" class="headerlink" title="13. Appium AI Assistant"></a>13. Appium AI Assistant</h3><p><strong>项目介绍</strong>：Appium的AI增强版本，提供智能元素定位和测试脚本生成功能。</p>
+<p><strong>GitHub地址</strong>：<a target="_blank" rel="noopener" href="https://github.com/appium-ai-assistant">https://github.com/appium-ai-assistant</a></p>
+<p><strong>核心特点</strong>：</p>
+<ul>
+<li>AI元素定位</li>
+<li>智能脚本生成</li>
+<li>自然语言测试</li>
+<li>自动修复测试</li>
+</ul>
+<p><strong>使用示例</strong>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> appium_ai_assistant <span class="keyword">import</span> AppiumAIAssistant</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建AI助手</span></span><br><span class="line">assistant = AppiumAIAssistant()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 智能元素定位</span></span><br><span class="line">element = assistant.find_element(<span class="string">&quot;登录按钮&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行操作</span></span><br><span class="line">assistant.click(element)</span><br><span class="line">assistant.input_text(<span class="string">&quot;用户名输入框&quot;</span>, <span class="string">&quot;testuser&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成测试脚本</span></span><br><span class="line">script = assistant.generate_script()</span><br></pre></td></tr></table></figure>
+
+<h2 id="工具对比分析"><a href="#工具对比分析" class="headerlink" title="工具对比分析"></a>工具对比分析</h2><h3 id="功能对比表"><a href="#功能对比表" class="headerlink" title="功能对比表"></a>功能对比表</h3><table>
+<thead>
+<tr>
+<th>工具名称</th>
+<th>学习成本</th>
+<th>功能丰富度</th>
+<th>AI支持</th>
+<th>社区活跃度</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Appium</td>
+<td>中等</td>
+<td>高</td>
+<td>无</td>
+<td>高</td>
+<td>企业级测试</td>
+</tr>
+<tr>
+<td>UIAutomator2</td>
+<td>低</td>
+<td>中</td>
+<td>无</td>
+<td>中</td>
+<td>原生应用测试</td>
+</tr>
+<tr>
+<td>Airtest</td>
+<td>低</td>
+<td>高</td>
+<td>基础</td>
+<td>中</td>
+<td>游戏测试</td>
+</tr>
+<tr>
+<td>STF</td>
+<td>高</td>
+<td>中</td>
+<td>无</td>
+<td>中</td>
+<td>设备管理</td>
+</tr>
+<tr>
+<td>Appium AI</td>
+<td>中等</td>
+<td>高</td>
+<td>高</td>
+<td>中</td>
+<td>智能测试</td>
+</tr>
+<tr>
+<td>Test.ai</td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+<td>低</td>
+<td>AI测试平台</td>
+</tr>
+<tr>
+<td>Katalon</td>
+<td>低</td>
+<td>高</td>
+<td>中</td>
+<td>高</td>
+<td>可视化测试</td>
+</tr>
+<tr>
+<td>Android UI Automator AI</td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+<td>低</td>
+<td>深度学习测试</td>
+</tr>
+<tr>
+<td>Mobile-Use</td>
+<td>低</td>
+<td>高</td>
+<td>高</td>
+<td>高</td>
+<td>自然语言自动化</td>
+</tr>
+<tr>
+<td>DroidRun</td>
+<td>中等</td>
+<td>高</td>
+<td>高</td>
+<td>中</td>
+<td>智能任务执行</td>
+</tr>
+</tbody></table>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>这篇内容刚好和之前的文章串联起来，也算是对之前相关的文章做了拓展介绍，Android自动化工具的核心在于通过ADB提供的底层接口实现对Android设备的精确控制。这些工具本质上都是ADB命令的高级封装，通过不同的技术路径来实现设备交互、UI操作和数据提取。</p>
+<p><strong>本文核心</strong>：所有Android自动化工具都基于ADB的三大核心功能：设备管理、Shell命令执行和文件传输，实现自动化测试的目标。通过AI技术提升自动化能力，无论是LLM或者NLP都能给这类工具带来新的革命</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章推荐</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\18\article13_adb_commands\" rel="bookmark">ADB命令实战指南：Android调试桥的实用技巧</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\13\article10_shamiko_analysis\" rel="bookmark">Magisk Root隐藏方案：Shamiko模块原理解析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\15\article11_frida_hook\" rel="bookmark">Frida Hook技术入门：从零开始掌握动态分析神器</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\16\article12_objection_usage\" rel="bookmark">Objection使用指南：基于Frida的移动安全测试神器</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="\2025\09\26\article16_unidbg_introduction\" rel="bookmark">Unidbg入门指南：Android Native代码模拟利器</a></div>
+    </li>
+  </ul>
+
+        <div class="reward-container">
+  <div>持续输出技术分享，您的支持将鼓励我继续创作!</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wxpay.jpg" alt="果子 微信支付">
+        <p>微信支付</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.jpg" alt="果子 支付宝">
+        <p>支付宝</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>果子
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://ihandmine.github.io/2025/09/19/article14_android_automation_tools/" title="基于ADB的Android自动化工具全解析">https://ihandmine.github.io/2025/09/19/article14_android_automation_tools/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags" id="post-tags">
+              <a href="/tags/ADB/" rel="tag"><i class="fa fa-tag"></i> ADB</a>
+              <a href="/tags/Android/" rel="tag"><i class="fa fa-tag"></i> Android</a>
+              <a href="/tags/%E8%87%AA%E5%8A%A8%E5%8C%96%E5%B7%A5%E5%85%B7/" rel="tag"><i class="fa fa-tag"></i> 自动化工具</a>
+          </div>
+
+        <script type="text/javascript">
+        var tagsall=document.getElementsByClassName("post-tags")
+        for (var i = tagsall.length - 1; i >= 0; i--){
+            var tags=tagsall[i].getElementsByTagName("a");
+            for (var j = tags.length - 1; j >= 0; j--) {
+                var r=Math.floor(Math.random()*75+130);
+                var g=Math.floor(Math.random()*75+100);
+                var b=Math.floor(Math.random()*75+80);
+                tags[j].style.background = "rgb("+r+","+g+","+b+")";
+            }
+        }                        
+        </script>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/09/18/article13_adb_commands/" rel="prev" title="ADB命令实战指南：Android调试桥的实用技巧">
+      <i class="fa fa-chevron-left"></i> ADB命令实战指南：Android调试桥的实用技巧
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2025/09/25/article15_android_app_capture_protection/" rel="next" title="Android App抓包防护与绕过技术">
+      Android App抓包防护与绕过技术 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Android%E8%87%AA%E5%8A%A8%E5%8C%96%E5%B7%A5%E5%85%B7%E6%A6%82%E8%BF%B0"><span class="nav-number">1.</span> <span class="nav-text">Android自动化工具概述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFAndroid%E8%87%AA%E5%8A%A8%E5%8C%96%E5%B7%A5%E5%85%B7"><span class="nav-number">1.1.</span> <span class="nav-text">什么是Android自动化工具</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E5%8C%96%E5%B7%A5%E5%85%B7"><span class="nav-number">2.</span> <span class="nav-text">自动化工具</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Appium"><span class="nav-number">2.1.</span> <span class="nav-text">1. Appium</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-UIAutomator2"><span class="nav-number">2.2.</span> <span class="nav-text">2. UIAutomator2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-ADB-Shell%E8%87%AA%E5%8A%A8%E5%8C%96"><span class="nav-number">2.3.</span> <span class="nav-text">3. ADB Shell自动化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-Airtest"><span class="nav-number">2.4.</span> <span class="nav-text">4. Airtest</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-STF-Smartphone-Test-Farm"><span class="nav-number">2.5.</span> <span class="nav-text">5. STF (Smartphone Test Farm)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Appium-Inspector-AI"><span class="nav-number">2.6.</span> <span class="nav-text">6. Appium Inspector AI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-Test-ai"><span class="nav-number">2.7.</span> <span class="nav-text">7. Test.ai</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-Katalon-Studio"><span class="nav-number">2.8.</span> <span class="nav-text">8. Katalon Studio</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-Android-UI-Automator-AI"><span class="nav-number">2.9.</span> <span class="nav-text">9. Android UI Automator AI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-Mobile-Test-AI"><span class="nav-number">2.10.</span> <span class="nav-text">10. Mobile Test AI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-Mobile-Use"><span class="nav-number">2.11.</span> <span class="nav-text">11. Mobile-Use</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-DroidRun"><span class="nav-number">2.12.</span> <span class="nav-text">12. DroidRun</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-Appium-AI-Assistant"><span class="nav-number">2.13.</span> <span class="nav-text">13. Appium AI Assistant</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E5%AF%B9%E6%AF%94%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">工具对比分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%9F%E8%83%BD%E5%AF%B9%E6%AF%94%E8%A1%A8"><span class="nav-number">3.1.</span> <span class="nav-text">功能对比表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AF%AD"><span class="nav-number">4.</span> <span class="nav-text">结语</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="果子"
+      src="/images/gzhavatar.jpg">
+  <p class="site-author-name" itemprop="name">果子</p>
+  <div class="site-description" itemprop="description">简单正直</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">21</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ihandmine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ihandmine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/handmine@outlook.com" title="E-Mail → handmine@outlook.com"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+        <div class="back-to-top motion-element">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">果子</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">221k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">3:21</span>
+</div>
+
+<!--
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+-->
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  
+  <script color='0,0,0' opacity='0.5' zIndex='-1' count='150' src="/lib/canvas-nest/canvas-nest.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+  
+
+  <script async src="/js/cursor/fireworks.js"></script>
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"model":{"jsonPath":"/live2dw/assets/tororo.model.json"},"display":{"position":"right","width":150,"height":300},"mobile":{"show":false},"log":false});</script></body>
+</html>
